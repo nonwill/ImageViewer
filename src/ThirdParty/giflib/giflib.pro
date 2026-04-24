@@ -11,7 +11,7 @@ CONFIG -= warn_on
 #CONFIG += hide_symbols
 CONFIG += exceptions_off rtti_off warn_off
 
-THIRDPARTY_GIFLIB_PATH = $${PWD}/giflib-5.2.2
+THIRDPARTY_GIFLIB_PATH = $${PWD}/giflib-6.1.3
 THIRDPARTY_GIFLIB_CONFIG_PATH = $${PWD}/config
 
 include(../../Features.pri)
