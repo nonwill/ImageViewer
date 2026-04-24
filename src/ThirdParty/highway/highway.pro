@@ -10,7 +10,7 @@ QT -= core gui
 CONFIG -= warn_on
 CONFIG += warn_off
 
-THIRDPARTY_HIGHWAY_PATH = $${PWD}/highway-1.3.0
+THIRDPARTY_HIGHWAY_PATH = $${PWD}/highway-1.4.0
 
 include(../../Features.pri)
 include(../CommonSettings.pri)
@@ -41,11 +41,14 @@ HEADERS += \
     $${THIRDPARTY_HIGHWAY_PATH}/hwy/bit_set.h \
     $${THIRDPARTY_HIGHWAY_PATH}/hwy/cache_control.h \
     $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/algo/copy-inl.h \
+    $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/algo/count-inl.h \
     $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/algo/find-inl.h \
+    $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/algo/minmax-inl.h \
     $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/algo/transform-inl.h \
     $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/bit_pack/bit_pack-inl.h \
     $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/dot/dot-inl.h \
     $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/image/image.h \
+    $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/math/fast_math-inl.h \
     $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/math/math-inl.h \
     $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/matvec/matvec-inl.h \
     $${THIRDPARTY_HIGHWAY_PATH}/hwy/contrib/random/random-inl.h \
