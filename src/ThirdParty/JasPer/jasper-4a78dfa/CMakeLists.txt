@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 3.20)
 # The major, minor, and micro version numbers of the project.
 set(JAS_VERSION_MAJOR 4)
 set(JAS_VERSION_MINOR 2)
-set(JAS_VERSION_PATCH 8)
+set(JAS_VERSION_PATCH 9)
 
 # The shared library versioning information.
 # Guidelines on how to change this information can be found below.
@@ -109,6 +109,7 @@ endif()
 option(JAS_PACKAGING "Enable packaging mode (e.g., disable RPATH)" OFF)
 
 option(JAS_ENABLE_CMAKE_PACKAGE_CONFIG "Enable CMake package config file generation" OFF)
+option(JAS_ENABLE_CMAKE_PACKAGE_CONFIG_CPS "Enable CPS support" ON)
 
 option(JAS_ENABLE_PIC "Enable position-independent code" ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ${JAS_ENABLE_PIC})
