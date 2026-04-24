@@ -1,4 +1,4 @@
-From 8dad857186a3efc16c3a6ab0ae251dc31562f8a1 Mon Sep 17 00:00:00 2001
+From ca6da2ecd5639a91cc1e0e51d5844d96eb85e967 Mon Sep 17 00:00:00 2001
 From: Peter Zhigalov <peter.zhigalov@gmail.com>
 Date: Sat, 7 Feb 2026 20:19:17 +0700
 Subject: [PATCH 4/4] Fix build with TDM-GCC 10.3
@@ -8,10 +8,10 @@ Subject: [PATCH 4/4] Fix build with TDM-GCC 10.3
  1 file changed, 5 insertions(+)
 
 diff --git a/src/crwimage_int.cpp b/src/crwimage_int.cpp
-index 9e2c1c6a4..b0f36b0c8 100644
+index 5017695e7..a6cdf12ae 100644
 --- a/src/crwimage_int.cpp
 +++ b/src/crwimage_int.cpp
-@@ -750,7 +750,12 @@ void CrwMap::decode0x180e(const CiffComponent& ciffComponent, const CrwMapping*
+@@ -752,7 +752,12 @@ void CrwMap::decode0x180e(const CiffComponent& ciffComponent, const CrwMapping*
    time_t t = v.value_.at(0);
    tm r;
  #ifdef _WIN32
