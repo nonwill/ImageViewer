@@ -60,7 +60,7 @@
 /* #undef HAVE_UNISTD_H */
 
 /* Define as const if the declaration of iconv() needs const. */
-#define ICONV_CONST 
+#define ICONV_CONST
 
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 /* #undef LT_OBJDIR */
@@ -75,7 +75,7 @@
 #define PACKAGE_NAME "EXIF library"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "EXIF library 0.6.25.1"
+#define PACKAGE_STRING "EXIF library 0.6.26"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libexif"
@@ -84,7 +84,7 @@
 #define PACKAGE_URL "https://libexif.github.io/"
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "0.6.25.1"
+#define PACKAGE_VERSION "0.6.26"
 
 /* Define to 1 if all of the C89 standard headers exist (not just the ones
    required in a freestanding environment). This macro is provided for
@@ -92,7 +92,7 @@
 #define STDC_HEADERS 1
 
 /* Version number of package */
-#define VERSION "0.6.25.1"
+#define VERSION "0.6.26"
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 /* #undef _FILE_OFFSET_BITS */
