@@ -1,7 +1,7 @@
-From 04f720a350566411979f8a2790a702cee55b599d Mon Sep 17 00:00:00 2001
+From c5c62f5e36439a9a49edc449e029b3741b68ce78 Mon Sep 17 00:00:00 2001
 From: Peter Zhigalov <peter.zhigalov@gmail.com>
 Date: Sat, 23 Nov 2024 18:48:48 +0700
-Subject: [PATCH 1/3] Remove C++11
+Subject: [PATCH] Remove C++11
 
 ---
  src/LercLib/BitMask.cpp          |   6 +-
@@ -9,7 +9,7 @@ Subject: [PATCH 1/3] Remove C++11
  src/LercLib/BitStuffer2.cpp      |   2 +-
  src/LercLib/Huffman.cpp          |  16 +-
  src/LercLib/Huffman.h            |   9 +-
- src/LercLib/Lerc.cpp             | 251 +++++++++++++++++--------------
+ src/LercLib/Lerc.cpp             | 247 +++++++++++++++++--------------
  src/LercLib/Lerc.h               |   5 +-
  src/LercLib/Lerc2.cpp            |  43 ++++--
  src/LercLib/Lerc2.h              |   7 +-
@@ -18,10 +18,10 @@ Subject: [PATCH 1/3] Remove C++11
  src/LercLib/fpl_Lerc2Ext.cpp     |  12 +-
  src/LercLib/fpl_Lerc2Ext.h       |  20 +--
  src/LercLib/include/Lerc_types.h |  68 ++++-----
- 14 files changed, 292 insertions(+), 225 deletions(-)
+ 14 files changed, 290 insertions(+), 223 deletions(-)
 
 diff --git a/src/LercLib/BitMask.cpp b/src/LercLib/BitMask.cpp
-index 6e91d9b..b54e606 100644
+index 65ee866..0cb680f 100644
 --- a/src/LercLib/BitMask.cpp
 +++ b/src/LercLib/BitMask.cpp
 @@ -29,7 +29,7 @@ USING_NAMESPACE_LERC
@@ -52,7 +52,7 @@ index 6e91d9b..b54e606 100644
    m_nRows = 0;
  }
 diff --git a/src/LercLib/BitMask.h b/src/LercLib/BitMask.h
-index 83c2e00..ae3ed3b 100644
+index 3e0b886..1a635b1 100644
 --- a/src/LercLib/BitMask.h
 +++ b/src/LercLib/BitMask.h
 @@ -25,6 +25,7 @@ Contributors:  Thomas Maurer
@@ -72,10 +72,10 @@ index 83c2e00..ae3ed3b 100644
 +  BitMask() : m_pBits(NULL), m_nCols(0), m_nRows(0)  {}
 +  BitMask(int nCols, int nRows) : m_pBits(NULL), m_nCols(0), m_nRows(0) { SetSize(nCols, nRows); }
    BitMask(const BitMask& src);
-   virtual ~BitMask()                        { Clear(); }
+   ~BitMask()                        { Clear(); }
  
 diff --git a/src/LercLib/BitStuffer2.cpp b/src/LercLib/BitStuffer2.cpp
-index c8b7ace..5a332fb 100644
+index 3d9c341..70a8983 100644
 --- a/src/LercLib/BitStuffer2.cpp
 +++ b/src/LercLib/BitStuffer2.cpp
 @@ -76,7 +76,7 @@ bool BitStuffer2::EncodeSimple(Byte** ppByte, const vector<unsigned int>& dataVe
@@ -88,7 +88,7 @@ index c8b7ace..5a332fb 100644
    if (!ppByte || sortedDataVec.empty())
      return false;
 diff --git a/src/LercLib/Huffman.cpp b/src/LercLib/Huffman.cpp
-index e64b170..7b8fa61 100644
+index 256e80b..8618d8b 100644
 --- a/src/LercLib/Huffman.cpp
 +++ b/src/LercLib/Huffman.cpp
 @@ -347,7 +347,7 @@ void Huffman::ClearTree()
@@ -133,7 +133,7 @@ index e64b170..7b8fa61 100644
    // create canonical codes and assign to orig code table
    unsigned int index = sortVec[0].second;
 diff --git a/src/LercLib/Huffman.h b/src/LercLib/Huffman.h
-index 80b7d94..02d6948 100644
+index 645dd64..2be97a9 100644
 --- a/src/LercLib/Huffman.h
 +++ b/src/LercLib/Huffman.h
 @@ -25,6 +25,7 @@ Contributors:  Thomas Maurer
@@ -180,7 +180,7 @@ index 80b7d94..02d6948 100644
        }
      }
 diff --git a/src/LercLib/Lerc.cpp b/src/LercLib/Lerc.cpp
-index dcf8057..d9517c6 100644
+index e65d173..58b5e66 100644
 --- a/src/LercLib/Lerc.cpp
 +++ b/src/LercLib/Lerc.cpp
 @@ -24,6 +24,7 @@ Contributors:  Thomas Maurer
@@ -188,10 +188,10 @@ index dcf8057..d9517c6 100644
  #include "Lerc.h"
  #include "Lerc2.h"
 +#include <cstdio>
- #include <typeinfo>
- #include <limits>
+ #include <cstring>
  #include <functional>
-@@ -54,7 +55,7 @@ ErrCode Lerc::ComputeCompressedSize(const void* pData, int version, DataType dt,
+ #include <limits>
+@@ -55,7 +56,7 @@ ErrCode Lerc::ComputeCompressedSize(const void* pData, int version, DataType dt,
    case DT_Double:  return ComputeCompressedSizeTempl((const double*)pData, LERC_ARG_1);
  
    default:
@@ -200,7 +200,7 @@ index dcf8057..d9517c6 100644
    }
  
  #undef LERC_ARG_1
-@@ -80,7 +81,7 @@ ErrCode Lerc::Encode(const void* pData, int version, DataType dt, int nDepth, in
+@@ -81,7 +82,7 @@ ErrCode Lerc::Encode(const void* pData, int version, DataType dt, int nDepth, in
    case DT_Double:  return EncodeTempl((const double*)pData, LERC_ARG_2);
  
    default:
@@ -209,7 +209,7 @@ index dcf8057..d9517c6 100644
    }
  
  #undef LERC_ARG_2
-@@ -119,14 +120,14 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
+@@ -120,14 +121,14 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
      if (pMins && pMaxs)
      {
        ErrCode errCode = GetRanges(pLercBlob, numBytesBlob, 0, lerc2Info, pMins, pMaxs, nElem);    // band 0
@@ -226,7 +226,7 @@ index dcf8057..d9517c6 100644
  
      struct Lerc2::HeaderInfo hdInfo;
      while (bTryNextBlob && Lerc2::GetHeaderInfo(pLercBlob + lercInfo.blobSize, numBytesBlob - lercInfo.blobSize, hdInfo, bHasMask))
-@@ -136,7 +137,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
+@@ -137,7 +138,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
         || hdInfo.nRows != lercInfo.nRows
         || (int)hdInfo.dt != (int)lercInfo.dt)
        {
@@ -235,7 +235,7 @@ index dcf8057..d9517c6 100644
        }
  
        bTryNextBlob = (hdInfo.version <= 5) || (hdInfo.nBlobsMore > 0);
-@@ -148,10 +149,10 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
+@@ -149,10 +150,10 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
          nMasks = 2;
  
        if (lercInfo.blobSize > std::numeric_limits<int>::max() - hdInfo.blobSize)    // guard against overflow
@@ -248,7 +248,7 @@ index dcf8057..d9517c6 100644
  
        lercInfo.zMin = min(lercInfo.zMin, hdInfo.zMin);
        lercInfo.zMax = max(lercInfo.zMax, hdInfo.zMax);
-@@ -160,7 +161,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
+@@ -161,7 +162,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
        if (pMins && pMaxs)
        {
          ErrCode errCode = GetRanges(pLercBlob + lercInfo.blobSize, numBytesBlob - lercInfo.blobSize, lercInfo.nBands, hdInfo, pMins, pMaxs, nElem);
@@ -257,7 +257,7 @@ index dcf8057..d9517c6 100644
            return errCode;
        }
  
-@@ -173,7 +174,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
+@@ -174,7 +175,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
      if (lercInfo.nUsesNoDataValue > 0)
        lercInfo.nUsesNoDataValue = lercInfo.nBands;    // if there is any noData used in any band, allow for different noData per band
  
@@ -266,7 +266,7 @@ index dcf8057..d9517c6 100644
    }
  
  
-@@ -193,7 +194,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
+@@ -194,7 +195,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
      size_t nBytesNeeded = 10 + 4 * sizeof(int) + 1 * sizeof(double);
  
      if (nBytesRead < nBytesNeeded)
@@ -275,7 +275,7 @@ index dcf8057..d9517c6 100644
  
      const Byte* ptr = pLercBlob;
      ptr += 10 + 2 * sizeof(int);
-@@ -205,7 +206,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
+@@ -206,7 +207,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
      memcpy(&maxZErrorInFile, ptr, sizeof(double));
  
      if (height > 20000 || width > 20000)    // guard against bogus numbers; size limitation for old Lerc1
@@ -284,16 +284,16 @@ index dcf8057..d9517c6 100644
  
      lercInfo.nDepth = 1;
      lercInfo.nCols = width;
-@@ -219,7 +220,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
+@@ -220,7 +221,7 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
      while (lercInfo.blobSize + numBytesHeaderBand1 < numBytesBlob)    // means there could be another band
      {
-       if (!cntZImg.read(&pByte, 1e12, false, onlyZPart))
+       if (!cntZImg.read(&pByte, pLercBlob + numBytesBlob, 1e12, false, onlyZPart))
 -        return (lercInfo.nBands > 0) ? ErrCode::Ok : ErrCode::Failed;    // no other band, we are done
 +        return (lercInfo.nBands > 0) ? ErrCode_Ok : ErrCode_Failed;    // no other band, we are done
  
        onlyZPart = true;
        lercInfo.blobSize = (int)(pByte - pLercBlob);
-@@ -255,11 +256,11 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
+@@ -256,11 +257,11 @@ ErrCode Lerc::GetLercInfo(const Byte* pLercBlob, unsigned int numBytesBlob, stru
        lercInfo.nBands++;
      }
  
@@ -307,7 +307,7 @@ index dcf8057..d9517c6 100644
  }
  
  // -------------------------------------------------------------------------- ;
-@@ -281,7 +282,7 @@ ErrCode Lerc::Decode(const Byte* pLercBlob, unsigned int numBytesBlob, int nMask
+@@ -282,7 +283,7 @@ ErrCode Lerc::Decode(const Byte* pLercBlob, unsigned int numBytesBlob, int nMask
    case DT_Double:  return DecodeTempl((double*)pData, LERC_ARG_3);
  
    default:
@@ -316,7 +316,7 @@ index dcf8057..d9517c6 100644
    }
  
  #undef LERC_ARG_3
-@@ -303,7 +304,7 @@ ErrCode Lerc::ConvertToDouble(const void* pDataIn, DataType dt, size_t nDataValu
+@@ -304,7 +305,7 @@ ErrCode Lerc::ConvertToDouble(const void* pDataIn, DataType dt, size_t nDataValu
    //case DT_Double:  no convert double to double
  
    default:
@@ -325,7 +325,7 @@ index dcf8057..d9517c6 100644
    }
  }
  
-@@ -318,10 +319,10 @@ ErrCode Lerc::ComputeCompressedSizeTempl(const T* pData, int version, int nDepth
+@@ -319,10 +320,10 @@ ErrCode Lerc::ComputeCompressedSizeTempl(const T* pData, int version, int nDepth
    numBytesNeeded = 0;
  
    if (!pData || nDepth <= 0 || nCols <= 0 || nRows <= 0 || nBands <= 0 || maxZErr < 0)
@@ -338,7 +338,7 @@ index dcf8057..d9517c6 100644
  
    unsigned int numBytesWritten = 0;
  
-@@ -330,15 +331,15 @@ ErrCode Lerc::ComputeCompressedSizeTempl(const T* pData, int version, int nDepth
+@@ -331,15 +332,15 @@ ErrCode Lerc::ComputeCompressedSizeTempl(const T* pData, int version, int nDepth
      if (pUsesNoData)
        for (int i = 0; i < nBands; i++)
          if (pUsesNoData[i])
@@ -357,7 +357,7 @@ index dcf8057..d9517c6 100644
    }
  }
  
-@@ -352,10 +353,10 @@ ErrCode Lerc::EncodeTempl(const T* pData, int version, int nDepth, int nCols, in
+@@ -353,10 +354,10 @@ ErrCode Lerc::EncodeTempl(const T* pData, int version, int nDepth, int nCols, in
    numBytesWritten = 0;
  
    if (!pData || nDepth <= 0 || nCols <= 0 || nRows <= 0 || nBands <= 0 || maxZErr < 0 || !pBuffer || !numBytesBuffer)
@@ -368,9 +368,9 @@ index dcf8057..d9517c6 100644
 -    return ErrCode::WrongParam;
 +    return ErrCode_WrongParam;
  
-   unsigned int numBytesNeeded = 0;
+   memset(pBuffer, 0, (size_t)numBytesBuffer);
  
-@@ -364,7 +365,7 @@ ErrCode Lerc::EncodeTempl(const T* pData, int version, int nDepth, int nCols, in
+@@ -367,7 +368,7 @@ ErrCode Lerc::EncodeTempl(const T* pData, int version, int nDepth, int nCols, in
      if (pUsesNoData)
        for (int i = 0; i < nBands; i++)
          if (pUsesNoData[i])
@@ -379,7 +379,7 @@ index dcf8057..d9517c6 100644
  
      return EncodeInternal_v5(pData, version, nDepth, nCols, nRows, nBands, nMasks, pValidBytes, maxZErr,
        numBytesNeeded, pBuffer, numBytesBuffer, numBytesWritten);
-@@ -384,10 +385,10 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
+@@ -387,10 +388,10 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
    unsigned char* pUsesNoData, double* noDataValues)
  {
    if (!pData || nDepth <= 0 || nCols <= 0 || nRows <= 0 || nBands <= 0 || !pLercBlob || !numBytesBlob)
@@ -392,7 +392,7 @@ index dcf8057..d9517c6 100644
  
    const Byte* pByte = pLercBlob;
    Lerc2::HeaderInfo hdInfo;
-@@ -397,22 +398,22 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
+@@ -400,22 +401,22 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
    {
      LercInfo lercInfo;
      ErrCode errCode = GetLercInfo(pLercBlob, numBytesBlob, lercInfo);    // fast for Lerc2, does most checks
@@ -419,7 +419,7 @@ index dcf8057..d9517c6 100644
  
        try
        {
-@@ -421,7 +422,7 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
+@@ -424,7 +425,7 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
        }
        catch (...)
        {
@@ -428,7 +428,7 @@ index dcf8057..d9517c6 100644
        }
      }
  
-@@ -434,10 +435,10 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
+@@ -437,10 +438,10 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
        if (((size_t)(pByte - pLercBlob) < numBytesBlob) && Lerc2::GetHeaderInfo(pByte, nBytesRemaining, hdInfo, bHasMask))
        {
          if (hdInfo.nDepth != nDepth || hdInfo.nCols != nCols || hdInfo.nRows != nRows)
@@ -441,7 +441,7 @@ index dcf8057..d9517c6 100644
  
          size_t nPix = (size_t)iBand * nRows * nCols;
          T* arr = pData + nPix * nDepth;
-@@ -445,10 +446,10 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
+@@ -448,10 +449,10 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
          bool bGetMask = iBand < nMasks;
  
          if (bGetMask && !bitMask.SetSize(nCols, nRows))
@@ -455,7 +455,7 @@ index dcf8057..d9517c6 100644
  
          if (lercInfo.nUsesNoDataValue && nDepth > 1)
          {
-@@ -456,11 +457,11 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
+@@ -459,11 +460,11 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
            noDataValues[iBand] = hdInfo.noDataValOrig;
  
            if (hdInfo.bPassNoDataValues && !RemapNoData(arr, bitMask, hdInfo))
@@ -469,15 +469,15 @@ index dcf8057..d9517c6 100644
        }
      }  // iBand
    }  // Lerc2
-@@ -477,28 +478,28 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
+@@ -480,28 +481,28 @@ ErrCode Lerc::DecodeTempl(T* pData, const Byte* pLercBlob, unsigned int numBytes
      {
        unsigned int numBytesHeader = iBand == 0 ? numBytesHeaderBand0 : numBytesHeaderBand1;
-       if ((size_t)(pByte - pLercBlob) + numBytesHeader > numBytesBlob)
+       if ((size_t)(pByte1 - pLercBlob) + numBytesHeader > numBytesBlob)
 -        return ErrCode::BufferTooSmall;
 +        return ErrCode_BufferTooSmall;
  
        bool onlyZPart = iBand > 0;
-       if (!zImg.read(&pByte1, 1e12, false, onlyZPart))
+       if (!zImg.read(&pByte1, pLercBlob + numBytesBlob, 1e12, false, onlyZPart))
 -        return ErrCode::Failed;
 +        return ErrCode_Failed;
  
@@ -505,7 +505,7 @@ index dcf8057..d9517c6 100644
  }
  
  // -------------------------------------------------------------------------- ;
-@@ -514,14 +515,14 @@ ErrCode Lerc::EncodeInternal_v5(const T* pData, int version, int nDepth, int nCo
+@@ -517,14 +518,14 @@ ErrCode Lerc::EncodeInternal_v5(const T* pData, int version, int nDepth, int nCo
  
    Lerc2 lerc2;
    if (version >= 0 && !lerc2.SetEncoderToOldVersion(version))
@@ -522,7 +522,7 @@ index dcf8057..d9517c6 100644
    vector<T> dataBuffer;
    vector<Byte> maskBuffer, prevMaskBuffer;
    BitMask bitMask;
-@@ -533,22 +534,22 @@ ErrCode Lerc::EncodeInternal_v5(const T* pData, int version, int nDepth, int nCo
+@@ -536,22 +537,22 @@ ErrCode Lerc::EncodeInternal_v5(const T* pData, int version, int nDepth, int nCo
  
      // using the proper section of valid bytes, check this band for NaN
      const T* arr = pData + nElem * iBand;
@@ -550,7 +550,7 @@ index dcf8057..d9517c6 100644
  
        if (iBand > 0 && MasksDiffer(&maskBuffer[0], pPrevByteMask, nPix))
          bEncMsk = true;
-@@ -575,30 +576,30 @@ ErrCode Lerc::EncodeInternal_v5(const T* pData, int version, int nDepth, int nCo
+@@ -578,30 +579,30 @@ ErrCode Lerc::EncodeInternal_v5(const T* pData, int version, int nDepth, int nCo
      if (bEncMsk)
      {
        if (pByteMask && !Convert(pByteMask, nCols, nRows, bitMask))
@@ -588,7 +588,7 @@ index dcf8057..d9517c6 100644
  }
  
  // -------------------------------------------------------------------------- ;
-@@ -613,7 +614,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
+@@ -616,7 +617,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
    numBytesWritten = 0;
  
    if (version >= 0 && version <= 5)
@@ -597,7 +597,7 @@ index dcf8057..d9517c6 100644
  
    Lerc2 lerc2;
  
-@@ -622,30 +623,30 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
+@@ -625,30 +626,30 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
  #endif
  
    if (version >= 0 && !lerc2.SetEncoderToOldVersion(version))
@@ -633,7 +633,7 @@ index dcf8057..d9517c6 100644
  
    // loop over the bands
    for (int iBand = 0; iBand < nBands; iBand++)
-@@ -654,7 +655,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
+@@ -657,7 +658,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
  
      // get the data and mask for this band
      const T* arrOrig = pData + nElem * iBand;
@@ -642,7 +642,7 @@ index dcf8057..d9517c6 100644
  
      // copy to buffer so we can modify it
      memcpy(&dataBuffer[0], arrOrig, nElem * sizeof(T));
-@@ -670,7 +671,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
+@@ -673,7 +674,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
      bool bIsFltDblAllInt = false;    // are the flt numbers all integer really? Double can be used for int numbers beyond 32 bit range
      bool bModifiedMask = false;    // can turn true if NaN or noData found at valid pixels
      bool bNeedNoData = false;    // can only turn true for nDepth > 1, and mix of valid and invalid values at the same pixel (special case)
@@ -651,7 +651,7 @@ index dcf8057..d9517c6 100644
  
      if (bIsFltOrDbl)    // if flt type, filter out NaN and / or noData values and update the mask if possible
      {
-@@ -682,7 +683,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
+@@ -685,7 +686,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
        errCode = FilterNoData(dataBuffer, maskBuffer, nDepth, nCols, nRows, maxZErrL, bPassNoDataValue, noDataL, bModifiedMask, bNeedNoData);
      }
  
@@ -660,7 +660,7 @@ index dcf8057..d9517c6 100644
        return errCode;
  
      if (bModifiedMask)
-@@ -708,40 +709,40 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
+@@ -711,35 +712,35 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
        bool bAllValid = !memchr(pByteMaskL, 0, nPix);
  
        if (!bAllValid && !Convert(pByteMaskL, nCols, nRows, bitMask))
@@ -674,16 +674,9 @@ index dcf8057..d9517c6 100644
      }
  
      // set other flags
- 
-     if (!lerc2.SetNoDataValues(bNeedNoData, noDataL, noDataOrig))
--      return ErrCode::Failed;
-+      return ErrCode_Failed;
- 
-     if (!lerc2.SetNumBlobsMoreToCome(nBands - 1 - iBand))
--      return ErrCode::Failed;
-+      return ErrCode_Failed;
- 
-     if (!lerc2.SetIsAllInt(bIsFltDblAllInt))
+     if ( !lerc2.SetNoDataValues(bNeedNoData, noDataL, noDataOrig)
+       || !lerc2.SetNumBlobsMoreToCome(nBands - 1 - iBand)
+       || !lerc2.SetIsAllInt(bIsFltDblAllInt))
 -      return ErrCode::Failed;
 +      return ErrCode_Failed;
  
@@ -710,7 +703,7 @@ index dcf8057..d9517c6 100644
  
  #ifdef ENCODE_VERIFY
        size_t blobSize = pDst - pDst0;
-@@ -749,7 +750,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
+@@ -747,7 +748,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
        if (!DecodeAndCompareToInput(pDst0, blobSize, maxZErrL, lerc2Verify, arrL, pByteMaskL,
          arrOrig, pByteMaskOrig, bPassNoDataValue, noDataOrig, bModifiedMask))
        {
@@ -719,7 +712,7 @@ index dcf8057..d9517c6 100644
        }
  #endif
  
-@@ -757,7 +758,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
+@@ -755,7 +756,7 @@ ErrCode Lerc::EncodeInternal(const T* pData, int version, int nDepth, int nCols,
    }  // iBand
  
    numBytesWritten = (unsigned int)(pDst - pBuffer);
@@ -728,7 +721,7 @@ index dcf8057..d9517c6 100644
  }
  
  // -------------------------------------------------------------------------- ;
-@@ -820,12 +821,12 @@ template<class T>
+@@ -818,12 +819,12 @@ template<class T>
  ErrCode Lerc::ConvertToDoubleTempl(const T* pDataIn, size_t nDataValues, double* pDataOut)
  {
    if (!pDataIn || !nDataValues || !pDataOut)
@@ -743,7 +736,7 @@ index dcf8057..d9517c6 100644
  }
  
  // -------------------------------------------------------------------------- ;
-@@ -833,10 +834,10 @@ ErrCode Lerc::ConvertToDoubleTempl(const T* pDataIn, size_t nDataValues, double*
+@@ -831,10 +832,10 @@ ErrCode Lerc::ConvertToDoubleTempl(const T* pDataIn, size_t nDataValues, double*
  template<class T> ErrCode Lerc::CheckForNaN(const T* arr, int nDepth, int nCols, int nRows, const Byte* pByteMask)
  {
    if (!arr || nDepth <= 0 || nCols <= 0 || nRows <= 0)
@@ -756,7 +749,7 @@ index dcf8057..d9517c6 100644
  
    for (size_t k = 0, i = 0; i < (size_t)nRows; i++)
    {
-@@ -862,10 +863,10 @@ template<class T> ErrCode Lerc::CheckForNaN(const T* arr, int nDepth, int nCols,
+@@ -860,10 +861,10 @@ template<class T> ErrCode Lerc::CheckForNaN(const T* arr, int nDepth, int nCols,
      }
  
      if (bFoundNaN)
@@ -769,7 +762,7 @@ index dcf8057..d9517c6 100644
  }
  
  // -------------------------------------------------------------------------- ;
-@@ -989,10 +990,10 @@ ErrCode Lerc::GetRanges(const Byte* pLercBlob, unsigned int numBytesBlob, int iB
+@@ -987,10 +988,10 @@ ErrCode Lerc::GetRanges(const Byte* pLercBlob, unsigned int numBytesBlob, int iB
    const int nDepth = lerc2Info.nDepth;
  
    if (nDepth <= 0 || iBand < 0 || !pMins || !pMaxs)
@@ -782,7 +775,7 @@ index dcf8057..d9517c6 100644
  
    if (nDepth == 1)
    {
-@@ -1002,15 +1003,15 @@ ErrCode Lerc::GetRanges(const Byte* pLercBlob, unsigned int numBytesBlob, int iB
+@@ -1000,15 +1001,15 @@ ErrCode Lerc::GetRanges(const Byte* pLercBlob, unsigned int numBytesBlob, int iB
    else
    {
      if (lerc2Info.bPassNoDataValues)    // for nDepth > 1, and mix of valid and invalid values at same pixel, better fail
@@ -801,7 +794,7 @@ index dcf8057..d9517c6 100644
  }
  
  // -------------------------------------------------------------------------- ;
-@@ -1215,23 +1216,23 @@ ErrCode Lerc::FilterNoData(std::vector<T>& dataBuffer, std::vector<Byte>& maskBu
+@@ -1213,23 +1214,23 @@ ErrCode Lerc::FilterNoData(std::vector<T>& dataBuffer, std::vector<Byte>& maskBu
    double& maxZError, bool bPassNoDataValue, double& noDataValue, bool& bModifiedMask, bool& bNeedNoData)
  {
    if (nDepth <= 0 || nCols <= 0 || nRows <= 0 || maxZError < 0)
@@ -830,7 +823,7 @@ index dcf8057..d9517c6 100644
  
    T origNoData = (T)noDataValue;
  
-@@ -1277,7 +1278,7 @@ ErrCode Lerc::FilterNoData(std::vector<T>& dataBuffer, std::vector<Byte>& maskBu
+@@ -1275,7 +1276,7 @@ ErrCode Lerc::FilterNoData(std::vector<T>& dataBuffer, std::vector<Byte>& maskBu
    if ((origNoData >= minVal - dist) && (origNoData <= maxVal + dist))
    {
      maxZError = 0.5;    // fall back to int lossless
@@ -839,7 +832,7 @@ index dcf8057..d9517c6 100644
    }
  
    if (bNeedNoData)
-@@ -1328,7 +1329,7 @@ ErrCode Lerc::FilterNoData(std::vector<T>& dataBuffer, std::vector<Byte>& maskBu
+@@ -1326,7 +1327,7 @@ ErrCode Lerc::FilterNoData(std::vector<T>& dataBuffer, std::vector<Byte>& maskBu
    if (maxZError != maxZErrL)
      maxZError = maxZErrL;
  
@@ -848,7 +841,7 @@ index dcf8057..d9517c6 100644
  }
  
  // -------------------------------------------------------------------------- ;
-@@ -1338,13 +1339,13 @@ ErrCode Lerc::FilterNoDataAndNaN(std::vector<T>& dataBuffer, std::vector<Byte>&
+@@ -1336,13 +1337,13 @@ ErrCode Lerc::FilterNoDataAndNaN(std::vector<T>& dataBuffer, std::vector<Byte>&
    double& maxZError, bool bPassNoDataValue, double& noDataValue, bool& bModifiedMask, bool& bNeedNoData, bool& bIsFltDblAllInt)
  {
    if (nDepth <= 0 || nCols <= 0 || nRows <= 0 || maxZError < 0)
@@ -865,7 +858,7 @@ index dcf8057..d9517c6 100644
  
    bModifiedMask = false;
    bNeedNoData = false;
-@@ -1360,7 +1361,7 @@ ErrCode Lerc::FilterNoDataAndNaN(std::vector<T>& dataBuffer, std::vector<Byte>&
+@@ -1358,7 +1359,7 @@ ErrCode Lerc::FilterNoDataAndNaN(std::vector<T>& dataBuffer, std::vector<Byte>&
    if (bPassNoDataValue)
    {
      if (bIsFloat4 && (noDataValue < -FLT_MAX || noDataValue > FLT_MAX))
@@ -901,7 +894,7 @@ index dcf8057..d9517c6 100644
      }
    }
  
-@@ -1516,7 +1517,7 @@ ErrCode Lerc::FilterNoDataAndNaN(std::vector<T>& dataBuffer, std::vector<Byte>&
+@@ -1499,7 +1500,7 @@ ErrCode Lerc::FilterNoDataAndNaN(std::vector<T>& dataBuffer, std::vector<Byte>&
    if (maxZError != maxZErrL)
      maxZError = maxZErrL;
  
@@ -910,7 +903,7 @@ index dcf8057..d9517c6 100644
  }
  
  // -------------------------------------------------------------------------- ;
-@@ -1529,10 +1530,19 @@ bool Lerc::FindNewNoDataBelowValidMin(double minVal, double maxZErr, bool bAllIn
+@@ -1512,10 +1513,19 @@ bool Lerc::FindNewNoDataBelowValidMin(double minVal, double maxZErr, bool bAllIn
      std::vector<T> noDataCandVec;
  
      { // collect dist candidates
@@ -933,7 +926,7 @@ index dcf8057..d9517c6 100644
  
        double candForLargeMinVal = (minVal > 0 ? floor(minVal / 2) : minVal * 2);    // also int
        noDataCandVec.push_back((T)candForLargeMinVal);
-@@ -1542,8 +1552,9 @@ bool Lerc::FindNewNoDataBelowValidMin(double minVal, double maxZErr, bool bAllIn
+@@ -1525,8 +1535,9 @@ bool Lerc::FindNewNoDataBelowValidMin(double minVal, double maxZErr, bool bAllIn
      std::sort(noDataCandVec.begin(), noDataCandVec.end(), std::greater<double>());
  
      // take the first one that satisfies the condition
@@ -944,7 +937,7 @@ index dcf8057..d9517c6 100644
        if ((noDataVal > (T)lowIntLimit) && (noDataVal < (T)(minVal - 2 * maxZErr)) && IsInt(noDataVal))
        {
          newNoDataVal = noDataVal;
-@@ -1556,10 +1567,23 @@ bool Lerc::FindNewNoDataBelowValidMin(double minVal, double maxZErr, bool bAllIn
+@@ -1539,10 +1550,23 @@ bool Lerc::FindNewNoDataBelowValidMin(double minVal, double maxZErr, bool bAllIn
      std::vector<T> noDataCandVec;
  
      { // dist candidates
@@ -971,7 +964,7 @@ index dcf8057..d9517c6 100644
  
        double candForLargeMinVal = (minVal > 0 ? minVal / 2 : minVal * 2);
        noDataCandVec.push_back((T)candForLargeMinVal);
-@@ -1572,8 +1596,9 @@ bool Lerc::FindNewNoDataBelowValidMin(double minVal, double maxZErr, bool bAllIn
+@@ -1555,8 +1579,9 @@ bool Lerc::FindNewNoDataBelowValidMin(double minVal, double maxZErr, bool bAllIn
      T lowestVal = (T)(bIsFloat4 ? -FLT_MAX : -DBL_MAX);
  
      // take the first one that satisfies the condition
@@ -983,7 +976,7 @@ index dcf8057..d9517c6 100644
        {
          newNoDataVal = noDataVal;
 diff --git a/src/LercLib/Lerc.h b/src/LercLib/Lerc.h
-index 715c30a..9baf3e4 100644
+index f701889..4fecb00 100644
 --- a/src/LercLib/Lerc.h
 +++ b/src/LercLib/Lerc.h
 @@ -23,6 +23,7 @@ Contributors:  Thomas Maurer
@@ -1006,18 +999,18 @@ index 715c30a..9baf3e4 100644
  
      // setup outgoing arrays accordingly, then call Decode()
 diff --git a/src/LercLib/Lerc2.cpp b/src/LercLib/Lerc2.cpp
-index 8b85340..a8a0e8c 100644
+index 5e0559f..71823be 100644
 --- a/src/LercLib/Lerc2.cpp
 +++ b/src/LercLib/Lerc2.cpp
-@@ -22,6 +22,7 @@ Contributors:   Thomas Maurer
-                 Lucian Plesea (provided checksum code)
+@@ -23,6 +23,7 @@ Contributors:   Thomas Maurer
  */
  
+ #include <climits>
 +#include <cstdio>
  #include <typeinfo>
  #include "Defines.h"
  #include "Lerc2.h"
-@@ -210,7 +211,7 @@ unsigned int Lerc2::ComputeNumBytesNeededToWrite(const T* arr, double maxZError,
+@@ -211,7 +212,7 @@ unsigned int Lerc2::ComputeNumBytesNeededToWrite(const T* arr, double maxZError,
  
    m_maxValToQuantize = GetMaxValToQuantize(m_headerInfo.dt);
  
@@ -1026,7 +1019,7 @@ index 8b85340..a8a0e8c 100644
    int nBytesTiling = 0;
  
    if (!ComputeMinMaxRanges(arr, m_zMinVec, m_zMaxVec))    // need this for diff encoding before WriteTiles()
-@@ -490,7 +491,7 @@ bool Lerc2::GetRanges(const Byte* pByte, size_t nBytesRemaining, double* pMins,
+@@ -491,7 +492,7 @@ bool Lerc2::GetRanges(const Byte* pByte, size_t nBytesRemaining, double* pMins,
    }
  
    bool rv = false;
@@ -1035,7 +1028,7 @@ index 8b85340..a8a0e8c 100644
  
    switch (m_headerInfo.dt)
    {
-@@ -1173,8 +1174,26 @@ bool Lerc2::TryRaiseMaxZError(const T* data, double& maxZError) const
+@@ -1174,8 +1175,26 @@ bool Lerc2::TryRaiseMaxZError(const T* data, double& maxZError) const
    const HeaderInfo& hd = m_headerInfo;
    const int nDepth = hd.nDepth;
  
@@ -1064,7 +1057,7 @@ index 8b85340..a8a0e8c 100644
  
    for (size_t i = 0; i < zErrCand.size(); i++)
      if (zErrCand[i] / 2 > maxZError)
-@@ -1879,7 +1898,7 @@ bool Lerc2::ComputeDiffSliceFlt(const T* data, const T* prevData, int numValidPi
+@@ -1880,7 +1899,7 @@ bool Lerc2::ComputeDiffSliceFlt(const T* data, const T* prevData, int numValidPi
  template<class T>
  bool Lerc2::WriteTile(const T* dataBuf, int num, Byte** ppByte, int& numBytesWritten, int j0, T zMin, T zMax,
    DataType dtZ, bool bDiffEnc, const std::vector<unsigned int>& quantVec, BlockEncodeMode blockEncodeMode,
@@ -1073,7 +1066,7 @@ index 8b85340..a8a0e8c 100644
  {
    Byte* ptr = *ppByte;
    Byte comprFlag = ((j0 >> 3) & 15) << 2;    // use bits 2345 for integrity check
-@@ -2073,7 +2092,7 @@ bool Lerc2::ReadTile(const Byte** ppByte, size_t& nBytesRemainingInOut, T* data,
+@@ -2074,7 +2093,7 @@ bool Lerc2::ReadTile(const Byte** ppByte, size_t& nBytesRemainingInOut, T* data,
          return false;
  
        double invScale = 2 * hd.maxZError;    // for int types this is int
@@ -1082,7 +1075,7 @@ index 8b85340..a8a0e8c 100644
  
        if (bufferVec.size() == maxElementCount)    // all valid
        {
-@@ -2182,6 +2201,14 @@ Lerc2::DataType Lerc2::GetDataType(T z)
+@@ -2183,6 +2202,14 @@ Lerc2::DataType Lerc2::GetDataType(T z)
  
  // -------------------------------------------------------------------------- ;
  
@@ -1097,7 +1090,7 @@ index 8b85340..a8a0e8c 100644
  void Lerc2::SortQuantArray(const vector<unsigned int>& quantVec, vector<pair<unsigned int, unsigned int> >& sortedQuantVec)
  {
    int numElem = (int)quantVec.size();
-@@ -2190,9 +2217,7 @@ void Lerc2::SortQuantArray(const vector<unsigned int>& quantVec, vector<pair<uns
+@@ -2191,9 +2218,7 @@ void Lerc2::SortQuantArray(const vector<unsigned int>& quantVec, vector<pair<uns
    for (int i = 0; i < numElem; i++)
      sortedQuantVec[i] = pair<unsigned int, unsigned int>(quantVec[i], i);
  
@@ -1109,7 +1102,7 @@ index 8b85340..a8a0e8c 100644
  
  // -------------------------------------------------------------------------- ;
 diff --git a/src/LercLib/Lerc2.h b/src/LercLib/Lerc2.h
-index bacfeb4..0a6ea46 100644
+index 3d61a7f..7c71f8d 100644
 --- a/src/LercLib/Lerc2.h
 +++ b/src/LercLib/Lerc2.h
 @@ -27,6 +27,7 @@ Contributors:  Thomas Maurer
@@ -1126,7 +1119,7 @@ index bacfeb4..0a6ea46 100644
    Lerc2();
 -  Lerc2(int nDepth, int nCols, int nRows, const Byte* pMaskBits = nullptr);    // valid / invalid bits as byte array
 +  Lerc2(int nDepth, int nCols, int nRows, const Byte* pMaskBits = NULL);    // valid / invalid bits as byte array
-   virtual ~Lerc2()  {}
+   ~Lerc2()  {}
  
    static int CurrentVersion() { return 6; }
  
@@ -1147,7 +1140,7 @@ index bacfeb4..0a6ea46 100644
  private:
  
 diff --git a/src/LercLib/Lerc_c_api_impl.cpp b/src/LercLib/Lerc_c_api_impl.cpp
-index ecf95bd..ff7e82d 100644
+index 25a2df0..f655916 100644
 --- a/src/LercLib/Lerc_c_api_impl.cpp
 +++ b/src/LercLib/Lerc_c_api_impl.cpp
 @@ -43,19 +43,19 @@ lerc_status lerc_computeCompressedSizeForVersion(const void* pData, int version,
@@ -1359,7 +1352,7 @@ index ecf95bd..ff7e82d 100644
  
  // -------------------------------------------------------------------------- ;
 diff --git a/src/LercLib/RLE.cpp b/src/LercLib/RLE.cpp
-index de0711a..67be874 100644
+index 07679a2..4b35f6c 100644
 --- a/src/LercLib/RLE.cpp
 +++ b/src/LercLib/RLE.cpp
 @@ -23,6 +23,7 @@ Contributors:  Thomas Maurer
@@ -1407,7 +1400,7 @@ index de0711a..67be874 100644
    }
  
 diff --git a/src/LercLib/fpl_Lerc2Ext.cpp b/src/LercLib/fpl_Lerc2Ext.cpp
-index 0f07642..5411618 100644
+index daff288..5b9a2a3 100644
 --- a/src/LercLib/fpl_Lerc2Ext.cpp
 +++ b/src/LercLib/fpl_Lerc2Ext.cpp
 @@ -393,8 +393,9 @@ int LosslessFPCompression::compressedLength() const
@@ -1455,7 +1448,7 @@ index 0f07642..5411618 100644
        }
  
 diff --git a/src/LercLib/fpl_Lerc2Ext.h b/src/LercLib/fpl_Lerc2Ext.h
-index 90c57cd..ed229c7 100644
+index c16e8b1..3685e78 100644
 --- a/src/LercLib/fpl_Lerc2Ext.h
 +++ b/src/LercLib/fpl_Lerc2Ext.h
 @@ -54,13 +54,14 @@ private:
@@ -1600,5 +1593,5 @@ index 83d1d78..cbca555 100644
  
  }    // namespace
 -- 
-2.47.0
+2.47.3
 

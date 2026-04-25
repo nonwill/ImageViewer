@@ -1,0 +1,10 @@
+node_modules
+
+# built library
+**/*.min.js
+.DS_Store
+src/*.js
+!src/lerc-wasm.js
+**/*.js.map
+npm-debug.log
+dist/**/*.*
