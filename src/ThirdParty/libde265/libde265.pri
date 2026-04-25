@@ -9,7 +9,7 @@ include($${PWD}/../../Features.pri)
 
     !system_libde265 {
 
-        THIRDPARTY_LIBDE265_PATH = $${PWD}/libde265-1.0.16
+        THIRDPARTY_LIBDE265_PATH = $${PWD}/libde265-1.0.18
 
         INCLUDEPATH += $${THIRDPARTY_LIBDE265_PATH}
         DEPENDPATH += $${THIRDPARTY_LIBDE265_PATH}
