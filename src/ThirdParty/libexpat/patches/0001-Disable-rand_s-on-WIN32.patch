@@ -1,4 +1,4 @@
-From e2358bfce3ca78393683ef23bf495348bb690bc9 Mon Sep 17 00:00:00 2001
+From 9ca478b3bfcac49c6c0ddbe2b49c6e34f23dafcc Mon Sep 17 00:00:00 2001
 From: Peter Zhigalov <peter.zhigalov@gmail.com>
 Date: Sat, 22 Mar 2025 19:29:35 +0700
 Subject: [PATCH] Disable rand_s on WIN32
@@ -8,25 +8,25 @@ Subject: [PATCH] Disable rand_s on WIN32
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/expat/lib/xmlparse.c b/expat/lib/xmlparse.c
-index 086fca59..e19587de 100644
+index 620d1e4b..6fd65905 100644
 --- a/expat/lib/xmlparse.c
 +++ b/expat/lib/xmlparse.c
-@@ -1126,7 +1126,7 @@ writeRandomBytes_arc4random(void *target, size_t count) {
+@@ -135,7 +135,7 @@
+ #  include "random_getrandom.h"
+ #endif /* defined(HAVE_GETRANDOM) || defined(HAVE_SYSCALL_GETRANDOM) */
  
- #endif /* defined(HAVE_ARC4RANDOM) && ! defined(HAVE_ARC4RANDOM_BUF) */
- 
--#ifdef _WIN32
+-#if defined(_WIN32)
 +#if defined(_WIN32) && ! defined(XML_POOR_ENTROPY)
+ #  include "random_rand_s.h"
+ #endif /* defined(_WIN32) */
  
- /* Provide declaration of rand_s() for MinGW-32 (not 64, which has it),
-    as it didn't declare it in its header prior to version 5.3.0 of its
-@@ -1213,7 +1213,7 @@ generate_hash_secret_salt(XML_Parser parser) {
+@@ -1088,7 +1088,7 @@ generate_hash_secret_salt(void) {
    return ENTROPY_DEBUG("arc4random", entropy);
  #else
    /* Try high quality providers first .. */
 -#  ifdef _WIN32
 +#  if defined(_WIN32) && ! defined(XML_POOR_ENTROPY)
-   if (writeRandomBytes_rand_s((void *)&entropy, sizeof(entropy))) {
+   if (writeRandomBytes_rand_s(&entropy, sizeof(entropy))) {
      return ENTROPY_DEBUG("rand_s", entropy);
    }
 -- 

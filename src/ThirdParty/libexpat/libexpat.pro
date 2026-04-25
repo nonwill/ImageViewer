@@ -10,7 +10,7 @@ TARGET = tp_libexpat
 CONFIG -= warn_on
 CONFIG += exceptions_off rtti_off warn_off
 
-THIRDPARTY_LIBEXPAT_PATH = $${PWD}/expat-2.7.4
+THIRDPARTY_LIBEXPAT_PATH = $${PWD}/expat-2.8.0
 THIRDPARTY_LIBEXPAT_CONFIG_PATH = $${PWD}/config
 
 include(../../Features.pri)
@@ -21,7 +21,7 @@ INCLUDEPATH = $${THIRDPARTY_LIBEXPAT_CONFIG_PATH} $${THIRDPARTY_LIBEXPAT_PATH}/l
 
 DEFINES += XML_POOR_ENTROPY XML_STATIC
 
-# find ./lib -name '*.c' | LANG=C sort | sed 's|^\.|    $${THIRDPARTY_LIBEXPAT_PATH}| ; s|$| \\|'
+# find ./lib -name '*.c' | grep -v '/random_' | LANG=C sort | sed 's|^\.|    $${THIRDPARTY_LIBEXPAT_PATH}| ; s|$| \\|'
 SOURCES += \
     $${THIRDPARTY_LIBEXPAT_PATH}/lib/xmlparse.c \
     $${THIRDPARTY_LIBEXPAT_PATH}/lib/xmlrole.c \
@@ -39,6 +39,12 @@ HEADERS += \
     $${THIRDPARTY_LIBEXPAT_PATH}/lib/internal.h \
     $${THIRDPARTY_LIBEXPAT_PATH}/lib/latin1tab.h \
     $${THIRDPARTY_LIBEXPAT_PATH}/lib/nametab.h \
+    $${THIRDPARTY_LIBEXPAT_PATH}/lib/random_arc4random.h \
+    $${THIRDPARTY_LIBEXPAT_PATH}/lib/random_arc4random_buf.h \
+    $${THIRDPARTY_LIBEXPAT_PATH}/lib/random_dev_urandom.h \
+    $${THIRDPARTY_LIBEXPAT_PATH}/lib/random_getentropy.h \
+    $${THIRDPARTY_LIBEXPAT_PATH}/lib/random_getrandom.h \
+    $${THIRDPARTY_LIBEXPAT_PATH}/lib/random_rand_s.h \
     $${THIRDPARTY_LIBEXPAT_PATH}/lib/siphash.h \
     $${THIRDPARTY_LIBEXPAT_PATH}/lib/utf8tab.h \
     $${THIRDPARTY_LIBEXPAT_PATH}/lib/winconfig.h \
