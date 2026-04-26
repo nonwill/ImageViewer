@@ -566,7 +566,7 @@ disable_zlib : !system_freetype {
 # libwmf options:
 #    disable_libwmf
 #    system_libwmf
-*msvc* : !system_libwmf : lessThan(MSVC_VERSION, 2010) {
+*msvc* : !system_libwmf : lessThan(MSVC_VERSION, 2013) {
     CONFIG *= disable_libwmf
 }
 disable_zlib : !system_libwmf {

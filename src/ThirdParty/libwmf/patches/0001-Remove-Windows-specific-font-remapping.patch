@@ -1,7 +1,7 @@
-From 44c47a290ebd48176b43319b3e121e7b54a01c38 Mon Sep 17 00:00:00 2001
+From b526f25f188f3f026a4a9878801d021ad9bce78d Mon Sep 17 00:00:00 2001
 From: Peter Zhigalov <peter.zhigalov@gmail.com>
 Date: Wed, 28 Dec 2022 05:56:57 +0700
-Subject: [PATCH 1/4] Remove Windows-specific font remapping
+Subject: [PATCH 1/5] Remove Windows-specific font remapping
 
 ---
  src/font.c | 54 -----------------------------------------------------
@@ -9,7 +9,7 @@ Subject: [PATCH 1/4] Remove Windows-specific font remapping
  2 files changed, 109 deletions(-)
 
 diff --git a/src/font.c b/src/font.c
-index cef40e5..c1ecb53 100644
+index 9ecd498..c1ecb53 100644
 --- a/src/font.c
 +++ b/src/font.c
 @@ -35,45 +35,6 @@
@@ -25,8 +25,8 @@ index cef40e5..c1ecb53 100644
 -	static char retval[1000] = "";
 -
 -	if (retval[0] == '\0')
--	{	strcpy (retval, _libwmf_get_fontdir ());
--		strcat (retval, "\\share\\libwmf\\fonts\\fontmap");
+-	{	snprintf (retval, sizeof (retval), "%s\\share\\libwmf\\fonts\\fontmap",
+-			  _libwmf_get_fontdir ());
 -	}
 -
 -	return retval;
@@ -169,5 +169,5 @@ index 8dd6410..7dc996d 100644
  }
  
 -- 
-2.30.2
+2.54.0
 
