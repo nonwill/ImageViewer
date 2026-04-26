@@ -1,4 +1,4 @@
-From 81437d7c75ef3fc5ddb45e55610f8edf2d1da743 Mon Sep 17 00:00:00 2001
+From ad63530291310b6be9b6091126d1ea3a556adb0b Mon Sep 17 00:00:00 2001
 From: Peter Zhigalov <peter.zhigalov@gmail.com>
 Date: Sun, 28 Nov 2021 20:18:16 +0700
 Subject: [PATCH 2/3] Fix build with MinGW 3.4.2
@@ -27,10 +27,10 @@ Subject: [PATCH 2/3] Fix build with MinGW 3.4.2
  20 files changed, 63 insertions(+), 52 deletions(-)
 
 diff --git a/internal/losslessjpeg.h b/internal/losslessjpeg.h
-index 7964822d..05479ccf 100644
+index eced82b3..eafa7447 100644
 --- a/internal/losslessjpeg.h
 +++ b/internal/losslessjpeg.h
-@@ -138,7 +138,7 @@ struct BitPumpJpeg : public BitPump
+@@ -133,7 +133,7 @@ struct BitPumpJpeg : public BitPump
  
  
  const uint32_t LIBRAW_DECODE_CACHE_BITS = 13;
@@ -115,10 +115,10 @@ index 94b54b8a..ebf4700b 100644
  
    crxLoadDecodeLoop(&img, hdr.nPlanes);
 diff --git a/src/decoders/decoders_dcraw.cpp b/src/decoders/decoders_dcraw.cpp
-index e74dabae..744d7296 100644
+index d293c23d..5189229b 100644
 --- a/src/decoders/decoders_dcraw.cpp
 +++ b/src/decoders/decoders_dcraw.cpp
-@@ -1027,10 +1027,10 @@ void LibRaw::nokia_load_raw()
+@@ -1028,10 +1028,10 @@ void LibRaw::nokia_load_raw()
    for (row = 0; row < raw_height; row++)
    {
        checkCancel();
@@ -132,10 +132,10 @@ index e74dabae..744d7296 100644
    }
    maximum = 0x3ff;
 diff --git a/src/decoders/decoders_libraw.cpp b/src/decoders/decoders_libraw.cpp
-index f7d99a07..b3aacde0 100644
+index 85fbe95a..60238dad 100644
 --- a/src/decoders/decoders_libraw.cpp
 +++ b/src/decoders/decoders_libraw.cpp
-@@ -469,9 +469,9 @@ void LibRaw::panasonicC6_load_raw()
+@@ -475,9 +475,9 @@ void LibRaw::panasonicC6_load_raw()
    {
      int rowstoread = MIN(rowstep, imgdata.sizes.raw_height - row);
      if (libraw_internal_data.internal_data.input->read(
@@ -147,7 +147,7 @@ index f7d99a07..b3aacde0 100644
      for (int crow = 0, col = 0; crow < rowstoread; crow++, col = 0)
      {
        unsigned short *rowptr =
-@@ -912,10 +912,10 @@ void LibRaw::phase_one_load_raw_s()
+@@ -918,10 +918,10 @@ void LibRaw::phase_one_load_raw_s()
  		if (readsz > maxsz)
  			throw LIBRAW_EXCEPTION_IO_CORRUPT;
  
@@ -161,7 +161,7 @@ index f7d99a07..b3aacde0 100644
  }
  
 diff --git a/src/decoders/decoders_libraw_dcrdefs.cpp b/src/decoders/decoders_libraw_dcrdefs.cpp
-index 5169a3dd..8877eb83 100644
+index cafa68ed..6e24ecfe 100644
 --- a/src/decoders/decoders_libraw_dcrdefs.cpp
 +++ b/src/decoders/decoders_libraw_dcrdefs.cpp
 @@ -55,14 +55,14 @@ void LibRaw::packed_tiled_dng_load_raw()
@@ -181,7 +181,7 @@ index 5169a3dd..8877eb83 100644
              adobe_copy_pixel(trow+row, tcol+col, &rp);
          }
          fseek(ifp, save + 4, SEEK_SET);
-@@ -217,10 +217,10 @@ void LibRaw::broadcom_load_raw()
+@@ -220,10 +220,10 @@ void LibRaw::broadcom_load_raw()
  
    for (row = 0; row < raw_height; row++)
    {
@@ -208,15 +208,17 @@ index 59805513..d4aee38d 100644
               (row = trow + cinfo.output_scanline) < height)
        {
 diff --git a/src/decoders/fp_dng.cpp b/src/decoders/fp_dng.cpp
-index e1bcb024..b931e139 100644
+index 4e717efc..eb09a512 100644
 --- a/src/decoders/fp_dng.cpp
 +++ b/src/decoders/fp_dng.cpp
-@@ -392,10 +392,10 @@ void LibRaw::deflate_dng_load_raw()
+@@ -409,12 +409,12 @@ void LibRaw::deflate_dng_load_raw()
        for (size_t x = 0; x < imgdata.sizes.raw_width; x += tiles.tileWidth, ++t)
        {
          libraw_internal_data.internal_data.input->seek(tiles.tOffsets[t], SEEK_SET);
--        libraw_internal_data.internal_data.input->read(cBuffer.data(), 1, tiles.tBytes[t]);
-+        libraw_internal_data.internal_data.input->read(&cBuffer[0], 1, tiles.tBytes[t]);
+-        int bytesread = libraw_internal_data.internal_data.input->read(cBuffer.data(), 1, tiles.tBytes[t]);
++        int bytesread = libraw_internal_data.internal_data.input->read(&cBuffer[0], 1, tiles.tBytes[t]);
+ 		if (bytesread < tiles.tBytes[t])
+ 			derror();
          unsigned long dstLen = tileBytes;
          int err =
 -            uncompress(uBuffer.data() + tileRowBytes, &dstLen, cBuffer.data(), (unsigned long)tiles.tBytes[t]);
@@ -224,7 +226,7 @@ index e1bcb024..b931e139 100644
          if (err != Z_OK)
          {
            throw LIBRAW_EXCEPTION_DECODE_RAW;
-@@ -409,7 +409,7 @@ void LibRaw::deflate_dng_load_raw()
+@@ -428,7 +428,7 @@ void LibRaw::deflate_dng_load_raw()
  
            for (size_t row = 0; row < rowsInTile; ++row) // do not process full tile if not needed
            {
@@ -233,7 +235,7 @@ index e1bcb024..b931e139 100644
                unsigned char *src = dst + tileRowBytes;
                DecodeFPDelta(src, dst, tiles.tileWidth / xFactor, ifd->samples * xFactor, bytesps);
                float lmax = expandFloats(dst, tiles.tileWidth * ifd->samples, bytesps);
-@@ -646,7 +646,7 @@ void LibRaw::uncompressed_fp_dng_load_raw()
+@@ -671,7 +671,7 @@ void LibRaw::uncompressed_fp_dng_load_raw()
  
              for (size_t row = 0; row < rowsInTile; ++row) // do not process full tile if not needed
              {
@@ -241,7 +243,7 @@ index e1bcb024..b931e139 100644
 +                unsigned char *dst = fullrowbytes > int(inrowbytes) ? &rowbuf[0]: // last tile in row, use buffer
                      (unsigned char *)&float_raw_image
                      [((y + row) * imgdata.sizes.raw_width + x) * ifd->samples];
-                 libraw_internal_data.internal_data.input->read(dst, 1, fullrowbytes);
+                 int bytesread = libraw_internal_data.internal_data.input->read(dst, 1, fullrowbytes);
 diff --git a/src/decoders/generic.cpp b/src/decoders/generic.cpp
 index f3d71f06..550d462e 100644
 --- a/src/decoders/generic.cpp
@@ -322,7 +324,7 @@ index 659fb01b..28222252 100644
    ~buffered_bitpump_t()
    {
 diff --git a/src/decoders/pana8.cpp b/src/decoders/pana8.cpp
-index 68296092..eab9b307 100644
+index 3343d749..9918eef6 100644
 --- a/src/decoders/pana8.cpp
 +++ b/src/decoders/pana8.cpp
 @@ -86,7 +86,7 @@ void pana8_bufio_t::refill(uint32_t newoffset)
@@ -343,7 +345,7 @@ index 68296092..eab9b307 100644
    begin = newoffset;
    end = newoffset + readwords;
  }
-@@ -189,9 +189,9 @@ bool pana8_param_t::DecodeC8(pana8_bufio_t &bufio, unsigned int width, unsigned
+@@ -191,9 +191,9 @@ bool pana8_param_t::DecodeC8(pana8_bufio_t &bufio, unsigned int width, unsigned
  
    uint8_t *big_huff_table = 0;
    if (_extrahuff)
@@ -355,7 +357,7 @@ index 68296092..eab9b307 100644
  
  #ifdef PANA8_FULLY_BUFFERED
    const uint8_t	*inputbyteptr = source.data();
-@@ -210,7 +210,7 @@ bool pana8_param_t::DecodeC8(pana8_bufio_t &bufio, unsigned int width, unsigned
+@@ -212,7 +212,7 @@ bool pana8_param_t::DecodeC8(pana8_bufio_t &bufio, unsigned int width, unsigned
    {
  	  for (uint32_t current_row = 0; current_row < halfheight; current_row++)
  	  {
@@ -365,7 +367,7 @@ index 68296092..eab9b307 100644
  
  		  for (int32_t col = 0; col < doublewidth; col++)
 diff --git a/src/decoders/sonycc.cpp b/src/decoders/sonycc.cpp
-index 21e65f8a..5436bf38 100644
+index 3a9b4d1b..8e564b0b 100644
 --- a/src/decoders/sonycc.cpp
 +++ b/src/decoders/sonycc.cpp
 @@ -91,7 +91,7 @@ bool LibRaw_SonyYCC_Decompressor::decode_sony_ljpeg_420(std::vector<uint16_t> &_
@@ -377,7 +379,7 @@ index 21e65f8a..5436bf38 100644
    copy_yuv_420(dest, 0, 0, width, y1, y2, y3, y4, cb, cr);
  
    for (int32_t row = 0; row < height; row += 2)
-@@ -270,10 +270,10 @@ void LibRaw::sony_ycbcr_load_raw()
+@@ -285,10 +285,10 @@ void LibRaw::sony_ycbcr_load_raw()
    for (int tile = 0; tile < tiles; tile++)
    {
  	  ifp->seek(toffsets[tile],SEEK_SET);
@@ -390,7 +392,7 @@ index 21e65f8a..5436bf38 100644
  	  if(dec.sof.cps != 3) // !YUV
          throw LIBRAW_EXCEPTION_IO_CORRUPT;
  	  if(dec.state != LibRaw_LjpegDecompressor::State::OK)
-@@ -292,14 +292,14 @@ void LibRaw::sony_ycbcr_load_raw()
+@@ -307,14 +307,14 @@ void LibRaw::sony_ycbcr_load_raw()
  	  {
  		  if(imgdata.rawparams.specials & LIBRAW_RAWSPECIAL_SRAW_NO_INTERPOLATE)
  	          copy_ycc(imgdata.image, S.raw_width, S.raw_height, tilerow * UD.tile_length, tilecol * UD.tile_width,
@@ -409,7 +411,7 @@ index 21e65f8a..5436bf38 100644
  
    for (int i = 0; i < 6; i++)
 diff --git a/src/decompressors/losslessjpeg.cpp b/src/decompressors/losslessjpeg.cpp
-index 423de0e4..e68272f4 100644
+index 81638a9f..9afa554f 100644
 --- a/src/decompressors/losslessjpeg.cpp
 +++ b/src/decompressors/losslessjpeg.cpp
 @@ -213,7 +213,7 @@ bool LibRaw_LjpegDecompressor::decode_ljpeg_422(std::vector<uint16_t> &_dest, in
@@ -484,10 +486,10 @@ index 2c2ad339..363d26e4 100644
        for (j = 0; j < colors; j++)
          for (out_cam[i][j] = 0.f, k = 0; k < 3; k++)
 diff --git a/src/preprocessing/ext_preprocess.cpp b/src/preprocessing/ext_preprocess.cpp
-index 71e924f8..17cb3b70 100644
+index e436aef4..b238c800 100644
 --- a/src/preprocessing/ext_preprocess.cpp
 +++ b/src/preprocessing/ext_preprocess.cpp
-@@ -116,7 +116,7 @@ void LibRaw::subtract(const char *fname)
+@@ -117,7 +117,7 @@ void LibRaw::subtract(const char *fname)
    std::vector<ushort> pixel(width, 0);
    for (row = 0; row < height; row++)
    {
@@ -540,7 +542,7 @@ index 2bbc4a12..d6d14237 100644
  }
  checked_buffer_t::checked_buffer_t(short ord, unsigned char *dd, int ss) : _order(ord), _data(dd), _len(ss) {}
 diff --git a/src/write/file_write.cpp b/src/write/file_write.cpp
-index b0a15028..48818fe8 100644
+index f7023492..de7bc9c4 100644
 --- a/src/write/file_write.cpp
 +++ b/src/write/file_write.cpp
 @@ -183,7 +183,7 @@ void LibRaw::write_ppm_tiff()
@@ -562,5 +564,5 @@ index b0a15028..48818fe8 100644
      }
      catch (...)
 -- 
-2.47.3
+2.54.0
 
