@@ -1,14 +1,14 @@
-From a51e9db9181acf712f47db0c3af34def27123c85 Mon Sep 17 00:00:00 2001
+From 955bf3e7a2a514995d22dab3c6f51e9c2b5512b2 Mon Sep 17 00:00:00 2001
 From: Peter Zhigalov <peter.zhigalov@gmail.com>
 Date: Thu, 13 Jun 2024 00:04:24 +0700
-Subject: [PATCH 1/4] Switch back from libdeflate to zlib
+Subject: [PATCH 1/5] Switch back from libdeflate to zlib
 
 ---
- src/lib/OpenEXRCore/compression.c | 126 +++++-------------------------
- 1 file changed, 20 insertions(+), 106 deletions(-)
+ src/lib/OpenEXRCore/compression.c | 130 +++++-------------------------
+ 1 file changed, 20 insertions(+), 110 deletions(-)
 
 diff --git a/src/lib/OpenEXRCore/compression.c b/src/lib/OpenEXRCore/compression.c
-index dc0c973b..eab434af 100644
+index d64d071e..eab434af 100644
 --- a/src/lib/OpenEXRCore/compression.c
 +++ b/src/lib/OpenEXRCore/compression.c
 @@ -16,29 +16,9 @@
@@ -103,7 +103,7 @@ index dc0c973b..eab434af 100644
      }
      return EXR_ERR_OUT_OF_MEMORY;
  }
-@@ -150,60 +105,19 @@ exr_uncompress_buffer (
+@@ -150,64 +105,19 @@ exr_uncompress_buffer (
      size_t              out_bytes_avail,
      size_t*             actual_out)
  {
@@ -170,12 +170,16 @@ index dc0c973b..eab434af 100644
 -        }
 -        else if (res == LIBDEFLATE_SHORT_OUTPUT)
 -        {
--            /* TODO: is this an error? */
+-            /* Decompression succeeded; *actual_out is the byte count. This is
+-             * not an error when out_bytes_avail exceeds the true uncompressed
+-             * size (e.g. PXR24/ZIP use padded scratch buffers). Callers that
+-             * need an exact payload size must compare *actual_out (see e.g.
+-             * undo_pxr24_impl). */
 -            return EXR_ERR_SUCCESS;
 -        }
          return EXR_ERR_CORRUPT_CHUNK;
      }
      return EXR_ERR_OUT_OF_MEMORY;
 -- 
-2.47.3
+2.54.0
 

@@ -19,7 +19,7 @@
 #ifndef INCLUDED_OPENEXR_VERSION_H
 #define OPENEXR_VERSION_MAJOR 3
 #define OPENEXR_VERSION_MINOR 4
-#define OPENEXR_VERSION_PATCH 4
+#define OPENEXR_VERSION_PATCH 10
 #define OPENEXR_SOVERSION 33
 #endif
 
@@ -29,8 +29,8 @@
 #define OPENEXR_IMATH_VERSION_PATCH 2
 
 #define OPENEXR_OPENJPH_VERSION_MAJOR 0
-#define OPENEXR_OPENJPH_VERSION_MINOR 24
-#define OPENEXR_OPENJPH_VERSION_PATCH 5
+#define OPENEXR_OPENJPH_VERSION_MINOR 26
+#define OPENEXR_OPENJPH_VERSION_PATCH 3
 
 //
 // Options / configuration based on O.S. / compiler
@@ -66,14 +66,14 @@
 // Version string for runtime access
 //
 
-#define OPENEXR_VERSION_STRING "3.4.4"
-#define OPENEXR_PACKAGE_STRING "OpenEXR 3.4.4"
+#define OPENEXR_VERSION_STRING "3.4.10"
+#define OPENEXR_PACKAGE_STRING "OpenEXR 3.4.10"
 
 #define OPENEXR_VERSION_RELEASE_TYPE ""
 // Deprecated, for back compatibility:
 #define OPENEXR_VERSION_EXTRA ""
 
-#define OPENEXR_LIB_VERSION_STRING "33.3.4.4"
+#define OPENEXR_LIB_VERSION_STRING "33.3.4.10"
 
 // clang-format on
 
@@ -92,6 +92,8 @@
 // Whether the user configured the library to have symbol visibility
 // tagged
 #define OPENEXR_ENABLE_API_VISIBILITY
+
+/* #undef OPENEXR_CORE_FUNCTIONS_EMBEDDED */
 
 /// \defgroup ExportMacros Macros to manage symbol visibility
 ///
@@ -125,8 +127,10 @@
 ///
 /// @{
 
+// Visibility attributes are ELF-specific; on Windows (MSVC or MinGW) they are
+// not supported and trigger -Wattributes warnings, so use empty macros there.
 #if defined(OPENEXR_ENABLE_API_VISIBILITY) &&                                  \
-    !(defined(OPENEXR_DLL) || defined(_MSC_VER))
+    !(defined(OPENEXR_DLL) || defined(_MSC_VER) || defined(_WIN32))
 #    define OPENEXR_PUBLIC_SYMBOL_ATTRIBUTE                                    \
         __attribute__ ((__visibility__ ("default")))
 #    define OPENEXR_PRIVATE_SYMBOL_ATTRIBUTE                                   \

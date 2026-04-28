@@ -1,4 +1,4 @@
-From 40dec68662440e97cbee42d22519dbad66b91a41 Mon Sep 17 00:00:00 2001
+From 14eb495897910e1919512fafd5247dd4297ac975 Mon Sep 17 00:00:00 2001
 From: Peter Zhigalov <peter.zhigalov@gmail.com>
 Date: Mon, 2 Feb 2026 02:06:45 +0700
 Subject: [PATCH 5/5] Remove usage of InitOnceExecuteOnce for MinGW GCC 8.1.0
@@ -9,12 +9,12 @@ Subject: [PATCH 5/5] Remove usage of InitOnceExecuteOnce for MinGW GCC 8.1.0
  1 file changed, 13 insertions(+), 10 deletions(-)
 
 diff --git a/src/lib/OpenEXRCore/internal_thread.h b/src/lib/OpenEXRCore/internal_thread.h
-index 6c3c1032..0fe76e71 100644
+index be2ff10d..bde3f91c 100644
 --- a/src/lib/OpenEXRCore/internal_thread.h
 +++ b/src/lib/OpenEXRCore/internal_thread.h
-@@ -13,19 +13,22 @@
- #if ILMTHREAD_THREADING_ENABLED
- #    ifdef _WIN32
+@@ -15,19 +15,22 @@
+  * problematic <threads.h>
+  */
  #        include <windows.h>
 -#        define ONCE_FLAG_INIT INIT_ONCE_STATIC_INIT
 -typedef INIT_ONCE once_flag;
@@ -43,8 +43,8 @@ index 6c3c1032..0fe76e71 100644
 +        } while (InterlockedCompareExchange (flag, ONCE_FLAG_FINISHED, ONCE_FLAG_FINISHED) != ONCE_FLAG_FINISHED);
 +    }
  }
- #    else
- #        include <pthread.h>
+ #    elif __has_include(<threads.h>) && !defined(__FreeBSD__)
+ /*
 -- 
-2.47.3
+2.54.0
 
