@@ -10,7 +10,7 @@ QT -= core gui
 CONFIG -= warn_on
 CONFIG += warn_off
 
-THIRDPARTY_OPENJPH_PATH = $${PWD}/OpenJPH-0.26.0
+THIRDPARTY_OPENJPH_PATH = $${PWD}/OpenJPH-0.27.0
 THIRDPARTY_OPENJPH_INCLUDE_PATH = $${PWD}/include
 THIRDPARTY_OPENJPH_CONFIG_PATH = $${PWD}/config
 
@@ -21,11 +21,7 @@ INCLUDEPATH = $${THIRDPARTY_OPENJPH_PATH}/src/core/openjph $${INCLUDEPATH}
 
 DEFINES += OJPH_DISABLE_SIMD
 
-SOURCES += \
-    $${THIRDPARTY_OPENJPH_CONFIG_PATH}/ojph_mem_c.c \
-    $${THIRDPARTY_OPENJPH_CONFIG_PATH}/ojph_mem_cpp.cpp \
-
-# find ./src/core -name '*.cpp' | LANG=C sort | egrep -v '(_sse|_avx|_ssse3|_wasm)' | sed 's|^\.|    $${THIRDPARTY_OPENJPH_PATH}| ; s|$| \\|'
+# find ./src/core -name '*.cpp' -o -name '*.c' | LANG=C sort | egrep -v '(_sse|_avx|_ssse3|_wasm)' | sed 's|^\.|    $${THIRDPARTY_OPENJPH_PATH}| ; s|$| \\|'
 SOURCES += \
     $${THIRDPARTY_OPENJPH_PATH}/src/core/codestream/ojph_codeblock.cpp \
     $${THIRDPARTY_OPENJPH_PATH}/src/core/codestream/ojph_codeblock_fun.cpp \
@@ -44,7 +40,8 @@ SOURCES += \
     $${THIRDPARTY_OPENJPH_PATH}/src/core/coding/ojph_block_encoder.cpp \
     $${THIRDPARTY_OPENJPH_PATH}/src/core/others/ojph_arch.cpp \
     $${THIRDPARTY_OPENJPH_PATH}/src/core/others/ojph_file.cpp \
-\#    $${THIRDPARTY_OPENJPH_PATH}/src/core/others/ojph_mem.cpp \
+    $${THIRDPARTY_OPENJPH_PATH}/src/core/others/ojph_mem.cpp \
+    $${THIRDPARTY_OPENJPH_PATH}/src/core/others/ojph_mem_c.c \
     $${THIRDPARTY_OPENJPH_PATH}/src/core/others/ojph_message.cpp \
     $${THIRDPARTY_OPENJPH_PATH}/src/core/transform/ojph_colour.cpp \
     $${THIRDPARTY_OPENJPH_PATH}/src/core/transform/ojph_transform.cpp \
