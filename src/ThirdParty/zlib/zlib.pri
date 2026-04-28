@@ -9,7 +9,7 @@ include($${PWD}/../../Features.pri)
 
     !system_zlib {
 
-        THIRDPARTY_ZLIB_PATH = $${PWD}/zlib-1.3.1
+        THIRDPARTY_ZLIB_PATH = $${PWD}/zlib-1.3.2
 
         INCLUDEPATH += $${THIRDPARTY_ZLIB_PATH}
         DEPENDPATH += $${THIRDPARTY_ZLIB_PATH}
