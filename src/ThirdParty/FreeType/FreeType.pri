@@ -1,4 +1,4 @@
-# URL: https://www.freetype.org/
+# URL: https://www.freetype.org/ + https://sourceforge.net/projects/freetype/files/freetype2/
 # License: FreeType License or GNU GPL v2 - https://www.freetype.org/license.html
 
 include($${PWD}/../../Features.pri)
