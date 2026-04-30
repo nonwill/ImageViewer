@@ -1,0 +1,29 @@
+From bfbf075c5ab2a080170fd9ce37aec43632803244 Mon Sep 17 00:00:00 2001
+From: Hans Wennborg <hans@chromium.org>
+Date: Tue, 3 Mar 2026 15:27:33 +0100
+Subject: [PATCH] Define EWOULDBLOCK if not defined already
+
+It's used in gzread/write.c, but not all systems have it (Issue #1168).
+---
+ gzguts.h | 5 +++++
+ 1 file changed, 5 insertions(+)
+
+diff --git a/gzguts.h b/gzguts.h
+index 266305d..f7946bd 100644
+--- a/gzguts.h
++++ b/gzguts.h
+@@ -136,6 +136,11 @@
+ #  endif
+ #endif
+ 
++/* some environments don't define EWOULDBLOCK */
++#ifndef EWOULDBLOCK
++#  define EWOULDBLOCK EAGAIN
++#endif
++
+ /* provide prototypes for these when building zlib without LFS */
+ #if !defined(_LARGEFILE64_SOURCE) || _LFS64_LARGEFILE-0 == 0
+     ZEXTERN gzFile ZEXPORT gzopen64(const char *, const char *);
+-- 
+2.47.3
+
