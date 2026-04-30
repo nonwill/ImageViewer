@@ -1,4 +1,4 @@
-# URL: https://www.libraw.org/download
+# URL: https://www.libraw.org/download + https://github.com/LibRaw/LibRaw/releases
 # License: GNU LGPL v2.1 or CDDL v1.0 - https://github.com/LibRaw/LibRaw/blob/master/COPYRIGHT
 
 TEMPLATE = lib
