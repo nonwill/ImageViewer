@@ -1,0 +1,25 @@
+From bedb99e7ca035ca18b105a2d6f51bb844d8ec0f3 Mon Sep 17 00:00:00 2001
+From: Peter Zhigalov <peter.zhigalov@gmail.com>
+Date: Fri, 1 May 2026 01:12:20 +0700
+Subject: [PATCH] Remove off_t usage
+
+---
+ src/io.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/io.c b/src/io.c
+index 2fc0bf23..7d5bb87f 100644
+--- a/src/io.c
++++ b/src/io.c
+@@ -163,7 +163,7 @@ avifIO * avifIOCreateFileReader(const char * filename)
+         fclose(f);
+         return NULL;
+     }
+-    off_t fileSize = ftello(f);
++    int64_t fileSize = (int64_t)ftello(f);
+     if (fileSize < 0) {
+         fclose(f);
+         return NULL;
+-- 
+2.47.3
+

@@ -163,7 +163,7 @@ avifIO * avifIOCreateFileReader(const char * filename)
         fclose(f);
         return NULL;
     }
-    off_t fileSize = ftello(f);
+    int64_t fileSize = (int64_t)ftello(f);
     if (fileSize < 0) {
         fclose(f);
         return NULL;
