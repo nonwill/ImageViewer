@@ -1,4 +1,4 @@
-From d782e7cbffe5dee6999dacf93e44f9b27a07252f Mon Sep 17 00:00:00 2001
+From 5fb7a73aac9b623c870fc76200ec940e7e7e85cf Mon Sep 17 00:00:00 2001
 From: Peter Zhigalov <peter.zhigalov@gmail.com>
 Date: Mon, 25 Apr 2022 01:45:25 +0700
 Subject: [PATCH 2/8] Remove C++17 features
@@ -15,10 +15,10 @@ Subject: [PATCH 2/8] Remove C++17 features
  8 files changed, 19 insertions(+), 19 deletions(-)
 
 diff --git a/src/imageformats/chunks.cpp b/src/imageformats/chunks.cpp
-index ef825ee..183c00a 100644
+index ccecd89..5407ded 100644
 --- a/src/imageformats/chunks.cpp
 +++ b/src/imageformats/chunks.cpp
-@@ -2951,9 +2951,9 @@ inline IPARChunk::Rgb yuvToRgb(IHDRChunk::Yuv yuv) {
+@@ -2959,9 +2959,9 @@ inline IPARChunk::Rgb yuvToRgb(IHDRChunk::Yuv yuv) {
      const auto r = yuv.y + (yuv.v - 128.) * 1.371;
      const auto g = (yuv.y - 0.299 * r - 0.114 * b) / 0.587;
  
@@ -32,10 +32,10 @@ index ef825ee..183c00a 100644
      return rgb;
  }
 diff --git a/src/imageformats/jp2.cpp b/src/imageformats/jp2.cpp
-index 65627d2..3324462 100644
+index 05e6524..84f5e51 100644
 --- a/src/imageformats/jp2.cpp
 +++ b/src/imageformats/jp2.cpp
-@@ -274,7 +274,7 @@ public:
+@@ -281,7 +281,7 @@ public:
                          qint32 v = jc.data[y * w + x] / divisor;
                          if (jc.sgnd) // never seen
                              v -= std::numeric_limits<typename std::make_signed<T>::type>::min();
@@ -44,7 +44,7 @@ index 65627d2..3324462 100644
                      }
                  }
              } else { // float
-@@ -480,7 +480,7 @@ public:
+@@ -487,7 +487,7 @@ public:
      }
      void setQuality(qint32 quality)
      {
@@ -54,10 +54,10 @@ index 65627d2..3324462 100644
  
      /*!
 diff --git a/src/imageformats/jxr.cpp b/src/imageformats/jxr.cpp
-index 936ab4d..45ab047 100644
+index 7bcaa07..d1ad61e 100644
 --- a/src/imageformats/jxr.cpp
 +++ b/src/imageformats/jxr.cpp
-@@ -1043,11 +1043,11 @@ bool JXRHandler::read(QImage *outImage)
+@@ -1124,11 +1124,11 @@ bool JXRHandler::read(QImage *outImage)
              if (img.depth() == 64) {
                  auto line = reinterpret_cast<qfloat16 *>(img.scanLine(y));
                  for (int x = 0, w = img.width() * 4; x < w; x += 4)
@@ -124,10 +124,10 @@ index 8af8a39..b64ae3c 100644
                      return QImage::Format_ARGB32;
                  }
 diff --git a/src/imageformats/util_p.h b/src/imageformats/util_p.h
-index 980f793..0e02ba3 100644
+index 85d1ef6..79b70ef 100644
 --- a/src/imageformats/util_p.h
 +++ b/src/imageformats/util_p.h
-@@ -49,7 +49,7 @@
+@@ -61,7 +61,7 @@
  #define META_KEY_LENS_SERIALNUMBER "LensSerialNumber"
  
  // QList uses some extra space for stuff, hence the 32 here suggested by Thiago Macieira
@@ -186,5 +186,5 @@ index 117c8da..5a94dcd 100644
          if (value.isEmpty())
              continue;
 -- 
-2.52.0
+2.47.3
 

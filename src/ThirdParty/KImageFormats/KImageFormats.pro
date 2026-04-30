@@ -490,6 +490,22 @@ DEFINES += LOG_TGAPLUGIN=tp_LOG_TGAPLUGIN
 # --------------------------------------------------------------------------------
 
 SOURCES += \
+    $${THIRDPARTY_KIMAGEFORMATS_PATH}/src/imageformats/tim.cpp
+
+HEADERS += \
+    $${THIRDPARTY_KIMAGEFORMATS_PATH}/src/imageformats/tim_p.h
+
+DEFINES += WRAPPER_USE_TIM_HANDLER
+
+DEFINES += TIMHandler=tp_TIMHandler
+DEFINES += TIMPlugin=tp_TIMPlugin
+DEFINES += TIMHandlerPrivate=tp_TIMHandlerPrivate
+DEFINES += TIMHeader=tp_TIMHeader
+DEFINES += LOG_TIMPLUGIN=tp_LOG_TIMPLUGIN
+
+# --------------------------------------------------------------------------------
+
+SOURCES += \
     $${THIRDPARTY_KIMAGEFORMATS_PATH}/src/imageformats/xcf.cpp
 
 HEADERS += \

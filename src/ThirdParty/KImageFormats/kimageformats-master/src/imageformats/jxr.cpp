@@ -38,14 +38,19 @@
 #include <cstring>
 
 Q_DECLARE_LOGGING_CATEGORY(LOG_JXRPLUGIN)
+
+#ifdef QT_DEBUG
+Q_LOGGING_CATEGORY(LOG_JXRPLUGIN, "kf.imageformats.plugins.jxr", QtDebugMsg)
+#else
 Q_LOGGING_CATEGORY(LOG_JXRPLUGIN, "kf.imageformats.plugins.jxr", QtWarningMsg)
+#endif
 
 /*!
  * Support for float images
  *
  * NOTE: Float images have values greater than 1 so they need an additional in place conversion.
  */
-// #define JXR_DENY_FLOAT_IMAGE
+// #define JXR_DENY_FLOAT_IMAGE // default commented
 #if QT_VERSION < QT_VERSION_CHECK(6, 2, 0)
 #define JXR_DENY_FLOAT_IMAGE
 #endif
@@ -118,28 +123,35 @@ public:
         , m_transformations(QImageIOHandler::TransformationNone)
     {
         m_tempDir = QSharedPointer<QTemporaryDir>(new QTemporaryDir);
-        if (PKCreateFactory(&pFactory, PK_SDK_VERSION) == WMP_errSuccess) {
-            PKCreateCodecFactory(&pCodecFactory, WMP_SDK_VERSION);
-        }
-        if (pFactory == nullptr || pCodecFactory == nullptr) {
-            qCWarning(LOG_JXRPLUGIN) << "JXRHandlerPrivate::JXRHandlerPrivate() initialization error of JXR library!";
+        if (auto err = PKCreateFactory(&pFactory, PK_SDK_VERSION)) {
+            qCCritical(LOG_JXRPLUGIN) << "JXRHandlerPrivate::JXRHandlerPrivate() error while initializing the JXR factory:" << err;
+        } else if (auto err = PKCreateCodecFactory(&pCodecFactory, WMP_SDK_VERSION)) {
+            qCCritical(LOG_JXRPLUGIN) << "JXRHandlerPrivate::JXRHandlerPrivate() error while initializing the JXR codec factory:" << err;
         }
     }
     JXRHandlerPrivate(const JXRHandlerPrivate &other) = default;
 
     ~JXRHandlerPrivate()
     {
-        if (pCodecFactory) {
-            PKCreateCodecFactory_Release(&pCodecFactory);
-        }
-        if (pFactory) {
-            PKCreateFactory_Release(&pFactory);
-        }
         if (pDecoder) {
-            PKImageDecode_Release(&pDecoder);
+            if (auto err = pDecoder->Release(&pDecoder)) {
+                qCWarning(LOG_JXRPLUGIN) << "JXRHandlerPrivate::JXRHandlerPrivate() error while releasing the decoder:" << err;
+            }
         }
         if (pEncoder) {
-            PKImageEncode_Release(&pEncoder);
+            if (auto err = pEncoder->Release(&pEncoder)) {
+                qCWarning(LOG_JXRPLUGIN) << "JXRHandlerPrivate::JXRHandlerPrivate() error while releasing the encoder:" << err;
+            }
+        }
+        if (pCodecFactory) {
+            if (auto err = pCodecFactory->Release(&pCodecFactory)) {
+                qCWarning(LOG_JXRPLUGIN) << "JXRHandlerPrivate::JXRHandlerPrivate() error while releasing the codec factory:" << err;
+            }
+        }
+        if (pFactory) {
+            if (auto err = pFactory->Release(&pFactory)) {
+                qCWarning(LOG_JXRPLUGIN) << "JXRHandlerPrivate::JXRHandlerPrivate() error while releasing the factory:" << err;
+            }
         }
     }
 
@@ -284,8 +296,12 @@ public:
     PKPixelFormatGUID jxrFormat() const
     {
         PKPixelFormatGUID pixelFormatGUID = GUID_PKPixelFormatUndefined;
-        if (pDecoder) {
-            pDecoder->GetPixelFormat(pDecoder, &pixelFormatGUID);
+        if (pDecoder == nullptr) {
+            return pixelFormatGUID;
+        }
+        if (auto err = pDecoder->GetPixelFormat(pDecoder, &pixelFormatGUID)) {
+            qCCritical(LOG_JXRPLUGIN) << "JXRHandlerPrivate::jxrFormat() error while getting pixel format:" << err;
+            return GUID_PKPixelFormatUndefined;
         }
         return pixelFormatGUID;
     }
@@ -305,6 +321,12 @@ public:
 
         auto jxrfmt = jxrFormat();
         auto qtFormat = exactFormat(jxrfmt);
+        if (qtFormat != QImage::Format_Invalid) {
+            return qtFormat;
+        }
+
+        // *** MCH could be RGB, CMYK ***
+        qtFormat = multichannelFormat(jxrfmt, colorSpace());
         if (qtFormat != QImage::Format_Invalid) {
             return qtFormat;
         }
@@ -399,17 +421,20 @@ public:
      */
     QSize imageSize() const
     {
-        if (pDecoder) {
-            qint32 w, h;
-            pDecoder->GetSize(pDecoder, &w, &h);
-            if (w > JXR_MAX_IMAGE_WIDTH || h > JXR_MAX_IMAGE_HEIGHT || w < 1 || h < 1) {
-                qCCritical(LOG_JXRPLUGIN) << "JXRHandlerPrivate::imageSize() Maximum image size is limited to" << JXR_MAX_IMAGE_WIDTH << "x"
-                                          << JXR_MAX_IMAGE_HEIGHT << "pixels";
-                return {};
-            }
-            return QSize(w, h);
+        if (pDecoder == nullptr) {
+            return {};
         }
-        return {};
+        qint32 w = 0, h = 0;
+        if (auto err = pDecoder->GetSize(pDecoder, &w, &h)) {
+            qCCritical(LOG_JXRPLUGIN) << "JXRHandlerPrivate::imageSize() error while getting the image size:" << err;
+            return {};
+        }
+        if (w > JXR_MAX_IMAGE_WIDTH || h > JXR_MAX_IMAGE_HEIGHT || w < 1 || h < 1) {
+            qCCritical(LOG_JXRPLUGIN) << "JXRHandlerPrivate::imageSize() Maximum image size is limited to" << JXR_MAX_IMAGE_WIDTH << "x"
+                                      << JXR_MAX_IMAGE_HEIGHT << "pixels";
+            return {};
+        }
+        return QSize(w, h);
     }
 
     /*!
@@ -422,8 +447,8 @@ public:
         if (pDecoder == nullptr) {
             return cs;
         }
-        quint32 size;
-        if (!pDecoder->GetColorContext(pDecoder, nullptr, &size) && size) {
+        quint32 size = 0;
+        if (!pDecoder->GetColorContext(pDecoder, nullptr, &size) && size > 0 && size < kMaxQVectorSize) {
             QByteArray ba(size, 0);
             if (!pDecoder->GetColorContext(pDecoder, reinterpret_cast<quint8 *>(ba.data()), &size)) {
                 cs = QColorSpace::fromIccProfile(ba);
@@ -443,7 +468,7 @@ public:
             return xmp;
         }
 #ifdef JXR_ENABLE_ADVANCED_METADATA
-        quint32 size;
+        quint32 size = 0;
         if (!PKImageDecode_GetXMPMetadata_WMP(pDecoder, nullptr, &size) && size > 0 && size < JXR_MAX_METADATA_SIZE) {
             QByteArray ba(size, 0);
             if (!PKImageDecode_GetXMPMetadata_WMP(pDecoder, reinterpret_cast<quint8 *>(ba.data()), &size)) {
@@ -504,7 +529,7 @@ public:
         }
         auto host = hostComputer();
         if (!host.isEmpty()) {
-            image.setText(QStringLiteral(META_KEY_HOSTCOMPUTER), capt);
+            image.setText(QStringLiteral(META_KEY_HOSTCOMPUTER), host);
         }
         auto docn = documentName();
         if (!docn.isEmpty()) {
@@ -562,7 +587,11 @@ public:
         if (device == nullptr || pEncoder == nullptr) {
             return false;
         }
-        if (auto err = PKImageEncode_Release(&pEncoder)) {
+        if (auto err = pEncoder->Terminate(pEncoder)) {
+            qCWarning(LOG_JXRPLUGIN) << "JXRHandlerPrivate::finalizeWriting() error while terminating the encoder:" << err;
+            return false;
+        }
+        if (auto err = pEncoder->Release(&pEncoder)) {
             qCWarning(LOG_JXRPLUGIN) << "JXRHandlerPrivate::finalizeWriting() error while releasing the encoder:" << err;
             return false;
         }
@@ -806,6 +835,49 @@ public:
         return GUID_PKPixelFormatUndefined;
     }
 
+    /*!
+     * \brief multichannelFormat
+     * I can only decide how to interpret multichannels by checking the color profile.
+     * If it's not present, I assume CMYK for 4 channels and RGB for 3 channels (like
+     * Windows does).
+     * \param jxrFormat Format to be converted.
+     * \param cs The color space of the image.
+     * \return A valid Qt format or QImage::Format_Invalid if there is no match
+     */
+    static QImage::Format multichannelFormat(const PKPixelFormatGUID &jxrFormat, const QColorSpace& cs)
+    {
+#if QT_VERSION >= QT_VERSION_CHECK(6, 8, 0)
+        auto model = QColorSpace::ColorModel::Undefined;
+        if (cs.isValid()) {
+            model = cs.colorModel();
+        } else if (!cs.iccProfile().isEmpty()) {
+            model = QColorSpace::ColorModel::Gray; // means invalid
+        }
+
+        if (IsEqualGUID(GUID_PKPixelFormat24bpp3Channels, jxrFormat)) {
+            if (model == QColorSpace::ColorModel::Rgb || model == QColorSpace::ColorModel::Undefined)
+                return QImage::Format_RGB888;
+        }
+
+        if (IsEqualGUID(GUID_PKPixelFormat32bpp4Channels, jxrFormat)) {
+            if (model == QColorSpace::ColorModel::Cmyk || model == QColorSpace::ColorModel::Undefined)
+                return QImage::Format_CMYK8888;
+        }
+
+        if (IsEqualGUID(GUID_PKPixelFormat32bpp3ChannelsAlpha, jxrFormat)) {
+            if (model == QColorSpace::ColorModel::Rgb || model == QColorSpace::ColorModel::Undefined)
+                return QImage::Format_RGBA8888;
+        }
+
+        if (IsEqualGUID(GUID_PKPixelFormat64bpp3ChannelsAlpha, jxrFormat)) {
+            if (model == QColorSpace::ColorModel::Rgb || model == QColorSpace::ColorModel::Undefined)
+                return QImage::Format_RGBA64;
+        }
+#endif
+
+        return QImage::Format_Invalid;
+    }
+
 private:
     static QList<std::pair<QImage::Format, PKPixelFormatGUID>> exactMatchingFormats()
     {
@@ -979,7 +1051,7 @@ bool JXRHandler::read(QImage *outImage)
     }
 
     // resolution
-    float hres, vres;
+    float hres = 0, vres = 0;
     if (auto err = d->pDecoder->GetResolution(d->pDecoder, &hres, &vres)) {
         qCWarning(LOG_JXRPLUGIN) << "JXRHandler::read() error while reading resolution:" << err;
     } else {
@@ -1011,14 +1083,18 @@ bool JXRHandler::read(QImage *outImage)
             return false;
         }
         if (auto err = pConverter->Initialize(pConverter, d->pDecoder, nullptr, convFmt)) {
-            PKFormatConverter_Release(&pConverter);
             qCWarning(LOG_JXRPLUGIN) << "JXRHandler::read() unable to initialize the converter:" << err;
+            if (auto err = pConverter->Release(&pConverter)) {
+                qCWarning(LOG_JXRPLUGIN) << "JXRHandler::read() error while releasing the converter:" << err;
+            }
             return false;
         }
         if (d->pDecoder->WMP.wmiI.cBitsPerUnit == size_t(img.depth())) { // in place conversion
             if (auto err = pConverter->Copy(pConverter, &rect, img.bits(), img.bytesPerLine())) {
-                PKFormatConverter_Release(&pConverter);
                 qCWarning(LOG_JXRPLUGIN) << "JXRHandler::read() unable to copy converted data:" << err;
+                if (auto err = pConverter->Release(&pConverter)) {
+                    qCWarning(LOG_JXRPLUGIN) << "JXRHandler::read() error while releasing the converter:" << err;
+                }
                 return false;
             }
         } else { // additional buffer needed
@@ -1028,20 +1104,27 @@ bool JXRHandler::read(QImage *outImage)
             qint64 limit = QImageReader::allocationLimit();
             if (limit && (buffSize + img.sizeInBytes()) > limit * 1024 * 1024) {
                 qCWarning(LOG_JXRPLUGIN) << "JXRHandler::read() unable to covert due to allocation limit set:" << limit << "MiB";
+                if (auto err = pConverter->Release(&pConverter)) {
+                    qCWarning(LOG_JXRPLUGIN) << "JXRHandler::read() error while releasing the converter:" << err;
+                }
                 return false;
             }
 #endif
             QVector<quint8> ba(buffSize);
             if (auto err = pConverter->Copy(pConverter, &rect, ba.data(), convStrideSize)) {
-                PKFormatConverter_Release(&pConverter);
                 qCWarning(LOG_JXRPLUGIN) << "JXRHandler::read() unable to copy converted data:" << err;
+                if (auto err = pConverter->Release(&pConverter)) {
+                    qCWarning(LOG_JXRPLUGIN) << "JXRHandler::read() error while releasing the converter:" << err;
+                }
                 return false;
             }
             for (qint32 y = 0, h = img.height(); y < h; ++y) {
                 std::memcpy(img.scanLine(y), ba.data() + convStrideSize * y, (std::min)(convStrideSize, qint64(img.bytesPerLine())));
             }
         }
-        PKFormatConverter_Release(&pConverter);
+        if (auto err = pConverter->Release(&pConverter)) {
+            qCWarning(LOG_JXRPLUGIN) << "JXRHandler::read() error while releasing the converter:" << err;
+        }
     }
 
     // Metadata (e.g.: icc profile, description, etc...)

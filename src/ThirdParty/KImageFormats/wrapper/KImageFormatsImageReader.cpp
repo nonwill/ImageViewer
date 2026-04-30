@@ -92,6 +92,9 @@
 #if defined (WRAPPER_USE_TGA_HANDLER)
 #include "../kimageformats-master/src/imageformats/tga_p.h"
 #endif
+#if defined (WRAPPER_USE_TIM_HANDLER)
+#include "../kimageformats-master/src/imageformats/tim_p.h"
+#endif
 #if defined (WRAPPER_USE_XCF_HANDLER)
 #include "../kimageformats-master/src/imageformats/xcf_p.h"
 #endif
@@ -171,6 +174,9 @@ enum BuiltInFormatType
 #endif
 #if defined (WRAPPER_USE_TGA_HANDLER)
     TgaFormat,
+#endif
+#if defined (WRAPPER_USE_TIM_HANDLER)
+    TimFormat,
 #endif
 #if defined (WRAPPER_USE_XCF_HANDLER)
     XcfFormat,
@@ -274,6 +280,9 @@ static const BuiltInFormatStruct BuiltInFormats[] =
 #endif
 #if defined (WRAPPER_USE_TGA_HANDLER)
     { TgaFormat , QList<QByteArray>() << "tga" },
+#endif
+#if defined (WRAPPER_USE_TIM_HANDLER)
+    { TimFormat , QList<QByteArray>() << "tim" },
 #endif
 #if defined (WRAPPER_USE_XCF_HANDLER)
     { XcfFormat , QList<QByteArray>() << "xcf" },
@@ -445,6 +454,11 @@ static QImageIOHandler *createReadHandlerHelper(QIODevice *device,
 #if defined (WRAPPER_USE_TGA_HANDLER)
         case TgaFormat:
             handler = new TGAHandler;
+            break;
+#endif
+#if defined (WRAPPER_USE_TIM_HANDLER)
+        case TimFormat:
+            handler = new TIMHandler;
             break;
 #endif
 #if defined (WRAPPER_USE_XCF_HANDLER)
@@ -634,6 +648,12 @@ static QImageIOHandler *createReadHandlerHelper(QIODevice *device,
             case TgaFormat:
                 if(TGAHandler::canRead(device))
                     handler = new TGAHandler;
+                break;
+#endif
+#if defined (WRAPPER_USE_TIM_HANDLER)
+            case TimFormat:
+                if(TIMHandler::canRead(device))
+                    handler = new TIMHandler;
                 break;
 #endif
 #if defined (WRAPPER_USE_XCF_HANDLER)
@@ -1419,6 +1439,9 @@ QList<QByteArray> KImageFormatsImageReader::supportedMimeTypes()
 #endif
 #if defined (WRAPPER_USE_TGA_HANDLER)
     result.append(QByteArrayLiteral("image/x-tga"));
+#endif
+#if defined (WRAPPER_USE_TIM_HANDLER)
+    result.append(QByteArrayLiteral("image/x-tim"));
 #endif
 #if defined (WRAPPER_USE_XCF_HANDLER)
     result.append(QByteArrayLiteral("image/x-xcf"));

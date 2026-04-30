@@ -1,11 +1,11 @@
-cmake_minimum_required(VERSION 3.27)
+cmake_minimum_required(VERSION 3.29)
 
-set(KF_VERSION "6.24.0") # handled by release scripts
-set(KF_DEP_VERSION "6.23.0") # handled by release scripts
+set(KF_VERSION "6.26.0") # handled by release scripts
+set(KF_DEP_VERSION "6.25.0") # handled by release scripts
 project(KImageFormats VERSION ${KF_VERSION})
 
 include(FeatureSummary)
-find_package(ECM 6.23.0  NO_MODULE)
+find_package(ECM 6.25.0  NO_MODULE)
 set_package_properties(ECM PROPERTIES TYPE REQUIRED DESCRIPTION "Extra CMake Modules." URL "https://commits.kde.org/extra-cmake-modules")
 feature_summary(WHAT REQUIRED_PACKAGES_NOT_FOUND FATAL_ON_MISSING_REQUIRED_PACKAGES)
 
@@ -21,7 +21,7 @@ include(ECMDeprecationSettings)
 include(CheckIncludeFiles)
 include(FindPkgConfig)
 
-set(REQUIRED_QT_VERSION 6.8.0)
+set(REQUIRED_QT_VERSION 6.9.0)
 find_package(Qt6Gui ${REQUIRED_QT_VERSION} REQUIRED NO_MODULE)
 
 find_package(KF6Archive ${KF_DEP_VERSION})
@@ -97,9 +97,10 @@ set_package_properties(LibRaw PROPERTIES
     PURPOSE "Required for the QImage plugin for RAW images"
 )
 
-# JXR plugin disabled by default due to security issues
-option(KIMAGEFORMATS_JXR "Enable plugin for JPEG XR format" OFF)
-if(KIMAGEFORMATS_JXR)
+# JXR plugin disabled by default due to security issues.
+# You should not enable it unless you know what you are doing.
+option(KIMAGEFORMATS_WITH_KNOWN_CRASHES_JXR "Enable plugin for JPEG XR format" OFF)
+if(KIMAGEFORMATS_WITH_KNOWN_CRASHES_JXR)
     find_package(LibJXR)
 endif()
 add_feature_info(LibJXR LibJXR_FOUND "required for the QImage plugin for JPEG XR images")

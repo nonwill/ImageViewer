@@ -1104,6 +1104,7 @@ QByteArray BODYChunk::deinterleave(const QByteArray &planes, qint32 y, const BMH
             //        (red and green modify operations are unavailable)
             auto ctlbits = bitplanes > 5 ? 2 : 1;
             auto max = (1 << (bitplanes - ctlbits)) - 1;
+            auto wrongIdx = false;
             quint8 prev[3] = {};
             for (qint32 i = 0, cnt = 0; i < rowLen; ++i) {
                 for (qint32 j = 0; j < 8; ++j, ++cnt) {
@@ -1135,7 +1136,7 @@ QByteArray BODYChunk::deinterleave(const QByteArray &planes, qint32 y, const BMH
                             prev[1] = qGreen(pal.at(idx));
                             prev[2] = qBlue(pal.at(idx));
                         } else {
-                            qCWarning(LOG_IFFPLUGIN) << "BODYChunk::deinterleave(): palette index" << idx << "is out of range";
+                            wrongIdx = true;
                         }
                         break;
                     }
@@ -1144,6 +1145,9 @@ QByteArray BODYChunk::deinterleave(const QByteArray &planes, qint32 y, const BMH
                     ba[cnt3 + 1] = char(prev[1]);
                     ba[cnt3 + 2] = char(prev[2]);
                 }
+            }
+            if (wrongIdx) {
+                qCWarning(LOG_IFFPLUGIN) << "BODYChunk::deinterleave(): HAM palette index out of range!";
             }
         } else if ((modeId & CAMGChunk::ModeId::HalfBrite) && (cmap) &&
                    (bitplanes >= BITPLANES_HALFBRIDE_MIN && bitplanes <= BITPLANES_HALFBRIDE_MAX)) {
@@ -1157,6 +1161,7 @@ QByteArray BODYChunk::deinterleave(const QByteArray &planes, qint32 y, const BMH
             // absolute colors.
             ba = QByteArray(rowLen * 8, char());
             auto palSize = cmap->count();
+            auto wrongIdx = false;
             for (qint32 i = 0, cnt = 0; i < rowLen; ++i) {
                 for (qint32 j = 0; j < 8; ++j, ++cnt) {
                     quint8 idx = 0, ctl = 0;
@@ -1171,9 +1176,12 @@ QByteArray BODYChunk::deinterleave(const QByteArray &planes, qint32 y, const BMH
                     if (idx < palSize) {
                         ba[cnt] = ctl ? idx + palSize : idx;
                     } else {
-                        qCWarning(LOG_IFFPLUGIN) << "BODYChunk::deinterleave(): palette index" << idx << "is out of range";
+                        wrongIdx = true;
                     }
                 }
+            }
+            if (wrongIdx) {
+                qCWarning(LOG_IFFPLUGIN) << "BODYChunk::deinterleave(): HalfBrite palette index out of range!";
             }
         } else {
             // From A Quick Introduction to IFF.txt:
@@ -3038,7 +3046,7 @@ QByteArray IDATChunk::strideRead(QIODevice *d, qint32 y, const IHDRChunk *header
         }
 
         if (header->model() == IHDRChunk::CLut4) {
-            if (rr.size() < header->width() / 2) {
+            if (rr.size() < (qint64(header->width()) + 1) / 2) {
                 return {};
             }
             QByteArray tmp(header->width(), char());
@@ -3120,7 +3128,8 @@ quint32 IDATChunk::strideSize(const IHDRChunk *header) const
         return 0;
     }
 
-    auto rs = (header->width() * header->depth() + 7) / 8;
+    // width() and depth() are at most 65535
+    auto rs = (quint32(header->width()) * header->depth() + 7) / 8;
 
     // No padding bytes are inserted in the data.
     if (header->model() == IHDRChunk::Rgb888) {

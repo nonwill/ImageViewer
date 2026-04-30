@@ -253,20 +253,27 @@ public:
     bool jp2ToImage(QImage *img) const
     {
         Q_ASSERT(img->depth() == 8 * sizeof(T) || img->depth() == 32 * sizeof(T));
-        for (qint32 c = 0, cc = m_jp2_image->numcomps; c < cc; ++c) {
-            auto cs = cc == 1 ? 1 : 4;
+        if (img->width() < 1 || img->height() < 1) {
+            return false;
+        }
+        auto maxChannels = qint32(img->bytesPerLine() / sizeof(T) / img->width());
+        for (qint32 c = 0, cc = std::min(qint32(m_jp2_image->numcomps), maxChannels); c < cc; ++c) {
+            auto cs = std::min(cc == 1 ? 1 : 4, maxChannels);
             auto &&jc = m_jp2_image->comps[c];
-            if (jc.data == nullptr)
+            if (jc.data == nullptr) {
                 return false;
-            if (qint32(jc.w) != img->width() || qint32(jc.h) != img->height())
+            }
+            if (qint32(jc.w) != img->width() || qint32(jc.h) != img->height()) {
                 return false;
+            }
 
             // discriminate between int and float (avoid complicating things by creating classes with template specializations)
             if (std::numeric_limits<T>::is_integer) {
-                auto divisor = 1;
-                if (jc.prec > sizeof(T) * 8) {
+                auto divisor = 1ull;
+                auto prec = std::min(size_t(jc.prec), sizeof(*jc.data) * 8);
+                if (prec > sizeof(T) * 8 && prec < 64) {
                     // convert to the wanted precision (e.g. 16-bit -> 8-bit: divisor = 65535 / 255 = 257)
-                    divisor = std::max(1, int(((1ll << jc.prec) - 1) / ((1ll << (sizeof(T) * 8)) - 1)));
+                    divisor = std::max(1ull, (((1ull << prec) - 1) / ((1ull << (sizeof(T) * 8)) - 1)));
                 }
                 for (qint32 y = 0, h = img->height(); y < h; ++y) {
                     auto ptr = reinterpret_cast<T *>(img->scanLine(y));

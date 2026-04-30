@@ -21,6 +21,7 @@ The following image formats have read-only support:
 - Krita (kra)
 - OpenRaster (ora)
 - Pixar raster (pxr)
+- PlayStation graphics (tim)
 - Portable FloatMap/HalfMap (pfm, phm)
 - Photoshop documents (psd, psb, pdd, psdt)
 - Radiance HDR (hdr)
@@ -154,7 +155,30 @@ About the image:
 - `Owner`: Name of the owner of the image.
 - `Software`: Name and version number of the software package(s) used to 
   create the image.
+- `Speed`: Floating-point number indicating the speed of GPS receiver 
+  movement in Km/h (e.g. 30.2).
 - `Title`: The title of the image.
+
+About the shot:
+- `DigitalZoomRatio`: Floating-point number indicating the digital zoom ratio
+  when the image was shot.
+- `ExposureMode`: Integer number indicating the exposure mode set when the 
+  image was shot as reported in the EXIF ​​specifications.
+- `ExposureProgram`: Integer number indicating the class of the program used 
+  by the camera to set exposure when the picture is taken as reported in the 
+  EXIF ​​specifications.
+- `ExposureTime`: Floating-point number indicating the exposure time, 
+  given in seconds (s).
+- `Flash`: Integer number indicating the status of flash when the image 
+  was shot as reported in the EXIF ​​specifications.
+- `FNumber`: Floating-point number indicating the F number.
+- `FocalLength`: Floating-point number indicating the actual focal length 
+  of the lens, in millimeters (mm).
+- `ISOSpeedRatings`: Integer number indicating the sensitivity of the camera 
+  or input device when the image was shot as reported in the EXIF 
+  ​​specifications.
+- `WhiteBalance`: Integer number indicating the white balance mode set when 
+  the image was shot as reported in the EXIF ​​specifications.
 
 About the camera:
 - `Manufacturer`: The manufacturer of the recording equipment.
@@ -250,6 +274,7 @@ limit depends on the format encoding).
 - RAW: 65,535 x 65,535 pixels
 - RGB: 65,535 x 65,535 pixels
 - SCT: 300,000 x 300,000 pixels
+- TIM: 65,535 x 65,535 pixels
 - TGA: 65,535 x 65,535 pixels
 - XCF: 300,000 x 300,000 pixels
 
@@ -293,6 +318,11 @@ plugin:
 - `DDS_DISABLE_STRIDE_ALIGNMENT`: disable the stride alignment based on DDS 
   pitch: it is known that some writers do not set it correctly.
 
+When writing, it is possible to set which pixel format to use by setting the
+subtypes. The default is `Automatic` which chooses the most appropriate format
+based on the image. For a complete list of subformats, please use the
+appropriate [`QImageWriter`](https://doc.qt.io/qt-6/qimagewriter.html) APIs.
+
 ### The HEIF plugin
 
 **This plugin is disabled by default. It can be enabled by settings
@@ -321,6 +351,10 @@ plugin:
 - `EXR_DISABLE_XMP_ATTRIBUTE`: disables the stores XMP values in a non-standard 
   attribute named "xmp". Note that Gimp reads the "xmp" attribute and Darktable 
   writes it as well.
+
+The plugin can set the following additional metadata:
+- `EXRLayerName`: A string containing the name of the EXR layer used to decode 
+   the image.
 
 ### The EPS plugin
 
@@ -377,6 +411,11 @@ JP2 plugin has the following limitations due to the lack of support by OpenJPEG:
 - Image resolution is not supported.
 - To write ICC profiles you need OpenJPEG V2.5.4 or higher
 
+When writing, it is possible to set which format to use by setting the 
+following subtypes:
+- `JP2` (default): Save data using the JP2 container.
+- `J2K`: Save only the compressed codestream.
+
 ### The JXL plugin
 
 **The current version of the plugin limits the image size to 256 megapixels
@@ -392,7 +431,12 @@ plugin:
 ### The JXR plugin
 
 **This plugin is disabled by default. It can be enabled by settings
-`KIMAGEFORMATS_JXR` to `ON` in your cmake options.**
+`KIMAGEFORMATS_WITH_KNOWN_CRASHES_JXR` to `ON` in your cmake options.**
+
+> [!caution]
+> The plugin disabled by default due to security issues in [jxrlib](https://github.com/4creators/jxrlib): 
+> the upstream jxrlib is dead and there is no "hope" they will fix the issues.
+> **You should not enable it unless you know what you are doing.**
 
 The following defines can be defined in cmake to modify the behavior of the 
 plugin:
@@ -440,6 +484,13 @@ plugin:
   of sRGB which significantly increases performance.
 - `PSD_NATIVE_CMYK_SUPPORT_DISABLED`: disable native support for CMYK images 
   when compiled with Qt 6.8+
+
+The plugin can set the following additional metadata:
+  - `PSDDuotoneOptions`: Byte array in hexadecimal format of color data of the 
+     duotone specification (the format of which is not documented). From the PSD 
+     specification: *"Other applications that read Photoshop files can treat a 
+     duotone image as a gray image, and just preserve the contents of the duotone 
+     information when reading and writing the file."*
 
 ### The RAW plugin
 
