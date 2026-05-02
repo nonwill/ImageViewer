@@ -22,9 +22,9 @@
 
 #ifdef __cplusplus
 namespace libyuv {
+extern "C" {
 extern const struct ArgbConstants kArgbI601Constants;
 extern const struct ArgbConstants kArgbJPEGConstants;
-extern "C" {
 #endif
 
 // Subsample amount uses a shift.
