@@ -460,6 +460,7 @@ void EvaluateCLUTfloatIn16(const cmsFloat32Number In[], cmsFloat32Number Out[], 
 static
 cmsUInt32Number CubeSize(const cmsUInt32Number Dims[], cmsUInt32Number b)
 {
+#ifndef CMS_DONT_USE_INT64
     cmsUInt32Number dim;
     cmsUInt64Number rv;
 
@@ -480,6 +481,28 @@ cmsUInt32Number CubeSize(const cmsUInt32Number Dims[], cmsUInt32Number b)
     if (rv > UINT_MAX / 15) return 0;
 
     return (cmsUInt32Number) rv;
+#else
+    // This is old code from lcms2-2.18
+    cmsUInt32Number rv, dim;
+
+    _cmsAssert(Dims != NULL);
+
+    for (rv = 1; b > 0; b--) {
+
+        dim = Dims[b-1];
+        if (dim <= 1) return 0;  // Error
+
+        rv *= dim;
+
+        // Check for overflow
+        if (rv > UINT_MAX / dim) return 0;
+    }
+
+    // Again, prevent overflow
+    if (rv > UINT_MAX / 15) return 0;
+
+    return rv;
+#endif
 }
 
 static
